@@ -40,6 +40,7 @@ func ConnectDb() {
 
 	log.Println("running migrations")
 	db.AutoMigrate(&models.Exercise{})
+	db.AutoMigrate(&models.Record{})
 
 	DB = Dbinstance{
 		Db: db,

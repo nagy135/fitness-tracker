@@ -11,12 +11,5 @@ func main() {
 	database.ConnectDb()
 	setupRoutes(app)
 
-	app.Get("/health", func(c *fiber.Ctx) error {
-		var data any = fiber.Map{
-			"status": "ok",
-		}
-		return c.JSON(data)
-	})
-
 	app.Listen(":8080")
 }

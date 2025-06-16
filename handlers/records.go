@@ -6,9 +6,9 @@ import (
 	"github.com/nagy135/fitness-tracker/models"
 )
 
-func GetExercises(c *fiber.Ctx) error {
-	var exercises []models.Exercise
-	result := database.DB.Db.Find(&exercises).Preload("records")
+func GetRecords(c *fiber.Ctx) error {
+	var records []models.Record
+	result := database.DB.Db.Find(&records)
 
 	if result.Error != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -16,18 +16,18 @@ func GetExercises(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(exercises)
+	return c.JSON(records)
 }
 
-func CreateExercise(c *fiber.Ctx) error {
-	var exercise models.Exercise
-	if err := c.BodyParser(&exercise); err != nil {
+func CreateRecord(c *fiber.Ctx) error {
+	var record models.Record
+	if err := c.BodyParser(&record); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	database.DB.Db.Create(&exercise)
+	database.DB.Db.Create(&record)
 
-	return c.JSON(exercise)
+	return c.JSON(record)
 }
