@@ -40,6 +40,19 @@ POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-  "user": "john",
-  "pass": "doe"
+  "name": "viktor",
+  "pass": "heslo"
+}
+
+### ======================================== ###
+
+###
+# @name create-user
+POST http://localhost:8080/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "viktor",
+  "pass": "heslo"
 }

@@ -8,36 +8,24 @@ import (
 	"github.com/nagy135/fitness-tracker/utils"
 )
 
-func GetExercises(c *fiber.Ctx) error {
-	var exercises []models.Exercise
-	result := database.DB.Db.Find(&exercises).Preload("records")
-
-	if result.Error != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"error": result.Error.Error(),
-		})
-	}
-
-	return c.JSON(exercises)
-}
-
-func CreateExercise(c *fiber.Ctx) error {
-	var exerciseDto dtos.ExerciseDto
-	if err := c.BodyParser(&exerciseDto); err != nil {
+func CreateUser(c *fiber.Ctx) error {
+	var userDto dtos.UserDto
+	if err := c.BodyParser(&userDto); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
 	}
 
-	if errors := utils.ValidateStruct(exerciseDto); len(errors) > 0 {
+	if errors := utils.ValidateStruct(userDto); len(errors) > 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"error":   "Validation failed",
 			"details": errors,
 		})
 	}
 
-	exercise := models.Exercise{
-		Name: exerciseDto.Name,
+	exercise := models.User{
+		Name: userDto.Name,
+		Pass: userDto.Pass,
 	}
 
 	result := database.DB.Db.Create(&exercise)

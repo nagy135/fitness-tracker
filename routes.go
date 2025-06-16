@@ -9,6 +9,7 @@ import (
 func setupRoutes(app *fiber.App) {
 
 	app.Post("/login", handlers.Login)
+	app.Post("/users", handlers.CreateUser)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		var data any = fiber.Map{

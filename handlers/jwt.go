@@ -1,13 +1,16 @@
 package handlers
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/nagy135/fitness-tracker/database"
 	"github.com/nagy135/fitness-tracker/dtos"
+	"github.com/nagy135/fitness-tracker/models"
 )
+
+const TOKEN_VALIDITY = time.Hour * 72
 
 func Login(c *fiber.Ctx) error {
 	var body dtos.LoginDto
@@ -16,23 +19,21 @@ func Login(c *fiber.Ctx) error {
 			"error": "Cannot parse JSON",
 		})
 	}
-	fmt.Println(body)
 
-	// Throws Unauthorized error
-	if body.User != "john" || body.Pass != "doe" {
+	var user models.User
+
+	result := database.DB.Db.Where("name = ? AND pass = ?", body.Name, body.Pass).First(&user)
+	if result.Error != nil {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 
-	// Create the Claims
 	claims := jwt.MapClaims{
-		"name":  "John Doe",
+		"name":  user.Name,
 		"admin": true,
-		"exp":   time.Now().Add(time.Hour * 72).Unix(),
+		"exp":   time.Now().Add(TOKEN_VALIDITY).Unix(),
 	}
 
-	// Create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	fmt.Println(token)
 
 	// Generate encoded token and send it as response.
 	t, err := token.SignedString([]byte("secret"))
