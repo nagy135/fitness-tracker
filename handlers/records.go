@@ -3,7 +3,9 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/nagy135/fitness-tracker/database"
+	"github.com/nagy135/fitness-tracker/dtos"
 	"github.com/nagy135/fitness-tracker/models"
+	"github.com/nagy135/fitness-tracker/utils"
 )
 
 func GetRecords(c *fiber.Ctx) error {
@@ -20,14 +22,37 @@ func GetRecords(c *fiber.Ctx) error {
 }
 
 func CreateRecord(c *fiber.Ctx) error {
-	var record models.Record
-	if err := c.BodyParser(&record); err != nil {
+	var recordDto dtos.RecordDto
+	
+	// Parse request body into DTO
+	if err := c.BodyParser(&recordDto); err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"error": err.Error(),
+			"error": "Cannot parse JSON",
 		})
 	}
 
-	database.DB.Db.Create(&record)
+	// Validate the DTO using shared validation utility
+	if errors := utils.ValidateStruct(recordDto); len(errors) > 0 {
+		return c.Status(400).JSON(fiber.Map{
+			"error":   "Validation failed",
+			"details": errors,
+		})
+	}
+
+	// Create model from validated DTO
+	record := models.Record{
+		Weight:     recordDto.Weight,
+		Feeling:    models.Feeling(recordDto.Feeling),
+		ExerciseID: recordDto.ExerciseID,
+	}
+
+	// Save to database
+	result := database.DB.Db.Create(&record)
+	if result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": result.Error.Error(),
+		})
+	}
 
 	return c.JSON(record)
 }

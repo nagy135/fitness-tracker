@@ -15,11 +15,13 @@ const (
 )
 
 type Record struct {
-	gorm.Model
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `json:"deletedAt,omitempty" gorm:"index"`
 
-	Weight    float32
-	Feeling   Feeling
-	CreatedAt time.Time
+	Weight    float32 `json:"weight"`
+	Feeling   Feeling `json:"feeling"`
 
-	ExerciseID uint
+	ExerciseID uint `json:"exerciseId"`
 }
