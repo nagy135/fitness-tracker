@@ -8,6 +8,7 @@ import (
 	"github.com/nagy135/fitness-tracker/database"
 	"github.com/nagy135/fitness-tracker/dtos"
 	"github.com/nagy135/fitness-tracker/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const TOKEN_VALIDITY = time.Hour * 72
@@ -22,8 +23,13 @@ func Login(c *fiber.Ctx) error {
 
 	var user models.User
 
-	result := database.DB.Db.Where("name = ? AND pass = ?", body.Name, body.Pass).First(&user)
+	result := database.DB.Db.Where("name = ?", body.Name).First(&user)
 	if result.Error != nil {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Pass), []byte(body.Pass))
+	if err != nil {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 

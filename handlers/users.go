@@ -6,6 +6,7 @@ import (
 	"github.com/nagy135/fitness-tracker/dtos"
 	"github.com/nagy135/fitness-tracker/models"
 	"github.com/nagy135/fitness-tracker/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func CreateUser(c *fiber.Ctx) error {
@@ -23,9 +24,16 @@ func CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userDto.Pass), bcrypt.DefaultCost)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Failed to hash password",
+		})
+	}
+
 	exercise := models.User{
 		Name: userDto.Name,
-		Pass: userDto.Pass,
+		Pass: string(hashedPassword),
 	}
 
 	result := database.DB.Db.Create(&exercise)
