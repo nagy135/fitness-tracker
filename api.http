@@ -1,27 +1,45 @@
 ###
 # @name get-all-exercises
 GET http://localhost:8080/exercises
+Authorization: Bearer {{accessToken}}
 
 ###
 # @name create-exercise
 POST http://localhost:8080/exercises
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "name": "Exercise 1"
 }
 
+### ======================================== ###
+
 ###
 # @name get-all-records
 GET http://localhost:8080/records
+Authorization: Bearer {{accessToken}}
 
 ###
 # @name create-record
 POST http://localhost:8080/records
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "exerciseId": 1,
   "weight": 100,
   "feeling": "easy"
+}
+
+### ======================================== ###
+
+###
+# @name login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "user": "john",
+  "pass": "doe"
 }
