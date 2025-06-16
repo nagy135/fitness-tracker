@@ -4,13 +4,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/nagy135/fitness-tracker/database"
 	"github.com/nagy135/fitness-tracker/dtos"
+	"github.com/nagy135/fitness-tracker/handlers/utils"
 	"github.com/nagy135/fitness-tracker/models"
-	"github.com/nagy135/fitness-tracker/utils"
+	utilsValidation "github.com/nagy135/fitness-tracker/utils"
 )
 
 func GetRecords(c *fiber.Ctx) error {
+	userId, err := utils.GetUserIDFromToken(c)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 	var records []models.Record
-	result := database.DB.Db.Find(&records)
+	result := database.DB.Db.Where("user_id = ?", userId).Find(&records)
 
 	if result.Error != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -22,6 +29,13 @@ func GetRecords(c *fiber.Ctx) error {
 }
 
 func CreateRecord(c *fiber.Ctx) error {
+	userId, err := utils.GetUserIDFromToken(c)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
 	var recordDto dtos.RecordDto
 	if err := c.BodyParser(&recordDto); err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -29,7 +43,7 @@ func CreateRecord(c *fiber.Ctx) error {
 		})
 	}
 
-	if errors := utils.ValidateStruct(recordDto); len(errors) > 0 {
+	if errors := utilsValidation.ValidateStruct(recordDto); len(errors) > 0 {
 		return c.Status(400).JSON(fiber.Map{
 			"error":   "Validation failed",
 			"details": errors,
@@ -40,6 +54,7 @@ func CreateRecord(c *fiber.Ctx) error {
 		Weight:     recordDto.Weight,
 		Feeling:    models.Feeling(recordDto.Feeling),
 		ExerciseID: recordDto.ExerciseID,
+		UserID:     userId,
 	}
 
 	result := database.DB.Db.Create(&record)

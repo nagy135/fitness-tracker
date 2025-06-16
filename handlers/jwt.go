@@ -22,7 +22,6 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-
 	result := database.DB.Db.Where("name = ?", body.Name).First(&user)
 	if result.Error != nil {
 		return c.SendStatus(fiber.StatusUnauthorized)
@@ -34,6 +33,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	claims := jwt.MapClaims{
+		"sub":   user.ID,
 		"name":  user.Name,
 		"admin": true,
 		"exp":   time.Now().Add(TOKEN_VALIDITY).Unix(),
