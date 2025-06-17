@@ -6,46 +6,75 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/nagy135/fitness-tracker/database"
-	"github.com/nagy135/fitness-tracker/dtos"
+	"github.com/nagy135/fitness-tracker/dto"
+	"github.com/nagy135/fitness-tracker/internal/config"
 	"github.com/nagy135/fitness-tracker/models"
+	"github.com/nagy135/fitness-tracker/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
-const TOKEN_VALIDITY = time.Hour * 72
+type AuthHandler struct {
+	db  *database.DBInstance
+	cfg *config.Config
+}
 
-func Login(c *fiber.Ctx) error {
-	var body dtos.LoginDto
-	if err := c.BodyParser(&body); err != nil {
+func NewAuthHandler(db *database.DBInstance, cfg *config.Config) *AuthHandler {
+	return &AuthHandler{
+		db:  db,
+		cfg: cfg,
+	}
+}
+
+func (h *AuthHandler) Login(c *fiber.Ctx) error {
+	var loginDto dto.LoginDto
+	if err := c.BodyParser(&loginDto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
 	}
 
-	var user models.User
-	result := database.DB.Db.Where("name = ?", body.Name).First(&user)
-	if result.Error != nil {
-		return c.SendStatus(fiber.StatusUnauthorized)
+	if errors := utils.ValidateStruct(loginDto); len(errors) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Validation failed",
+			"details": errors,
+		})
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.Pass), []byte(body.Pass))
+	var user models.User
+	result := h.db.DB.Where("name = ?", loginDto.Name).First(&user)
+	if result.Error != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid credentials",
+		})
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginDto.Pass))
 	if err != nil {
-		return c.SendStatus(fiber.StatusUnauthorized)
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid credentials",
+		})
 	}
 
 	claims := jwt.MapClaims{
-		"sub":   user.ID,
-		"name":  user.Name,
-		"admin": true,
-		"exp":   time.Now().Add(TOKEN_VALIDITY).Unix(),
+		"sub":  user.ID,
+		"name": user.Name,
+		"exp":  time.Now().Add(h.cfg.JWT.Duration).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte("secret"))
+	tokenString, err := token.SignedString([]byte(h.cfg.JWT.Secret))
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to generate token",
+		})
 	}
 
-	return c.JSON(fiber.Map{"token": t})
+	return c.JSON(fiber.Map{
+		"token": tokenString,
+		"user": fiber.Map{
+			"id":   user.ID,
+			"name": user.Name,
+		},
+	})
 }

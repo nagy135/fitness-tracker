@@ -12,6 +12,6 @@ type User struct {
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `json:"deletedAt,omitempty" gorm:"index"`
 
-	Name string `json:"name"`
-	Pass string `json:"pass"`
+	Name     string `json:"name"`
+	Password string `json:"-" gorm:"column:pass"` // Don't expose password in JSON
 }

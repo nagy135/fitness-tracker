@@ -1,4 +1,4 @@
-package utils
+package auth
 
 import (
 	"errors"
@@ -14,13 +14,13 @@ func GetUserIDFromToken(c *fiber.Ctx) (uint, error) {
 
 	subClaim, exists := claims["sub"]
 	if !exists {
-		return 0, errors.New("Token missing user ID (sub claim)")
+		return 0, errors.New("token missing user ID (sub claim)")
 	}
 
-	userId, ok := subClaim.(float64)
+	userID, ok := subClaim.(float64)
 	if !ok {
-		return 0, errors.New("Invalid user ID format in token")
+		return 0, errors.New("invalid user ID format in token")
 	}
 
-	return uint(userId), nil
+	return uint(userID), nil
 } 

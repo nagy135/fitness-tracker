@@ -3,47 +3,61 @@ package database
 import (
 	"fmt"
 	"log"
-	"os"
 
+	"github.com/nagy135/fitness-tracker/internal/config"
 	"github.com/nagy135/fitness-tracker/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type Dbinstance struct {
-	Db *gorm.DB
+type DBInstance struct {
+	DB *gorm.DB
 }
 
-var DB Dbinstance
-
-func ConnectDb() {
+// ConnectDB initializes database connection with proper configuration
+func ConnectDB(cfg *config.Config) (*DBInstance, error) {
 	dsn := fmt.Sprintf(
-		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=Asia/Shanghai",
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+		cfg.Database.Host,
+		cfg.Database.User,
+		cfg.Database.Password,
+		cfg.Database.Name,
+		cfg.Database.Port,
 	)
-	fmt.Println(dsn)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 
 	if err != nil {
-		log.Fatal("Failed to connect to database. \n", err)
-		os.Exit(2)
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	log.Println("connected")
-	db.Logger = logger.Default.LogMode(logger.Info)
+	log.Println("Database connected successfully")
 
-	log.Println("running migrations")
-	db.AutoMigrate(&models.Exercise{})
-	db.AutoMigrate(&models.Record{})
-	db.AutoMigrate(&models.User{})
-
-	DB = Dbinstance{
-		Db: db,
+	log.Println("Running migrations...")
+	if err := runMigrations(db); err != nil {
+		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
+
+	return &DBInstance{
+		DB: db,
+	}, nil
+}
+
+func runMigrations(db *gorm.DB) error {
+	models := []any{
+		&models.User{},
+		&models.Exercise{},
+		&models.Record{},
+	}
+
+	for _, model := range models {
+		if err := db.AutoMigrate(model); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

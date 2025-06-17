@@ -23,6 +23,7 @@ type Record struct {
 	Weight  float32 `json:"weight"`
 	Feeling Feeling `json:"feeling"`
 
-	ExerciseID uint `json:"exerciseId"`
-	UserID     uint `json:"userId"`
+	ExerciseID uint     `json:"exerciseId"`
+	Exercise   Exercise `json:"exercise" gorm:"foreignKey:ExerciseID"`
+	UserID     uint     `json:"userId"`
 }

@@ -10,7 +10,7 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "name": "Exercise 1"
+  "name": "Benchpress"
 }
 
 ### ======================================== ###
@@ -41,7 +41,7 @@ Content-Type: application/json
 
 {
   "name": "viktor",
-  "pass": "heslo"
+  "pass": "password_long_enough"
 }
 
 ### ======================================== ###
@@ -54,5 +54,5 @@ Authorization: Bearer {{accessToken}}
 
 {
   "name": "viktor",
-  "pass": "heslo"
+  "pass": "password_long_enough"
 }

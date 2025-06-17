@@ -3,28 +3,34 @@ package main
 import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/nagy135/fitness-tracker/database"
 	"github.com/nagy135/fitness-tracker/handlers"
+	"github.com/nagy135/fitness-tracker/internal/config"
 )
 
-func setupRoutes(app *fiber.App) {
-
-	app.Post("/login", handlers.Login)
-	app.Post("/users", handlers.CreateUser)
+// SetupRoutes configures all application routes
+func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
+	// Public routes
+	app.Post("/login", handlers.NewAuthHandler(db, cfg).Login)
+	app.Post("/users", handlers.NewUserHandler(db).CreateUser)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
-		var data any = fiber.Map{
+		return c.JSON(fiber.Map{
 			"status": "ok",
-		}
-		return c.JSON(data)
+		})
 	})
 
+	// JWT middleware for protected routes
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte("secret")},
+		SigningKey: jwtware.SigningKey{Key: []byte(cfg.JWT.Secret)},
 	}))
 
-	app.Get("/exercises", handlers.GetExercises)
-	app.Post("/exercises", handlers.CreateExercise)
+	// Protected routes
+	exerciseHandler := handlers.NewExerciseHandler(db)
+	app.Get("/exercises", exerciseHandler.GetExercises)
+	app.Post("/exercises", exerciseHandler.CreateExercise)
 
-	app.Get("/records", handlers.GetRecords)
-	app.Post("/records", handlers.CreateRecord)
+	recordHandler := handlers.NewRecordHandler(db)
+	app.Get("/records", recordHandler.GetRecords)
+	app.Post("/records", recordHandler.CreateRecord)
 }

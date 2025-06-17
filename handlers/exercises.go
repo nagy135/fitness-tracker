@@ -3,34 +3,45 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/nagy135/fitness-tracker/database"
-	"github.com/nagy135/fitness-tracker/dtos"
+	"github.com/nagy135/fitness-tracker/dto"
 	"github.com/nagy135/fitness-tracker/models"
 	"github.com/nagy135/fitness-tracker/utils"
 )
 
-func GetExercises(c *fiber.Ctx) error {
+type ExerciseHandler struct {
+	db *database.DBInstance
+}
+
+func NewExerciseHandler(db *database.DBInstance) *ExerciseHandler {
+	return &ExerciseHandler{db: db}
+}
+
+func (h *ExerciseHandler) GetExercises(c *fiber.Ctx) error {
 	var exercises []models.Exercise
-	result := database.DB.Db.Find(&exercises).Preload("records")
+	result := h.db.DB.Preload("Records").Find(&exercises)
 
 	if result.Error != nil {
-		return c.Status(500).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": result.Error.Error(),
 		})
 	}
 
-	return c.JSON(exercises)
+	return c.JSON(fiber.Map{
+		"exercises": exercises,
+		"count":     len(exercises),
+	})
 }
 
-func CreateExercise(c *fiber.Ctx) error {
-	var exerciseDto dtos.ExerciseDto
+func (h *ExerciseHandler) CreateExercise(c *fiber.Ctx) error {
+	var exerciseDto dto.ExerciseDto
 	if err := c.BodyParser(&exerciseDto); err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
 	}
 
 	if errors := utils.ValidateStruct(exerciseDto); len(errors) > 0 {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "Validation failed",
 			"details": errors,
 		})
@@ -40,12 +51,12 @@ func CreateExercise(c *fiber.Ctx) error {
 		Name: exerciseDto.Name,
 	}
 
-	result := database.DB.Db.Create(&exercise)
+	result := h.db.DB.Create(&exercise)
 	if result.Error != nil {
-		return c.Status(500).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": result.Error.Error(),
 		})
 	}
 
-	return c.JSON(exercise)
+	return c.Status(fiber.StatusCreated).JSON(exercise)
 }
