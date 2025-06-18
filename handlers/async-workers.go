@@ -34,7 +34,6 @@ type ExternalAPIExercise struct {
 	ID               string   `json:"id"`
 }
 
-// convertToExercise converts an ExternalAPIExercise to a models.Exercise
 func (w *AsyncWorker) convertToExercise(external ExternalAPIExercise) (models.Exercise, error) {
 	// Convert slices to JSON strings
 	primaryMusclesJSON, err := json.Marshal(external.PrimaryMuscles)
@@ -71,17 +70,17 @@ func (w *AsyncWorker) convertToExercise(external ExternalAPIExercise) (models.Ex
 	}
 
 	exercise := models.Exercise{
-		Name:             external.Name,
-		ExternalID:       &external.ID,
-		Force:            external.Force,
-		Level:            level,
-		Mechanic:         external.Mechanic,
-		Equipment:        external.Equipment,
-		Category:         category,
-		PrimaryMuscles:   &primaryMusclesStr,
-		SecondaryMuscles: &secondaryMusclesStr,
-		Instructions:     &instructionsStr,
-		Images:           &imagesStr,
+		Name:               external.Name,
+		ExternalID:         &external.ID,
+		Force:              external.Force,
+		Level:              level,
+		Mechanic:           external.Mechanic,
+		Equipment:          external.Equipment,
+		Category:           category,
+		PrimaryMusclesDB:   &primaryMusclesStr,
+		SecondaryMusclesDB: &secondaryMusclesStr,
+		InstructionsDB:     &instructionsStr,
+		ImagesDB:           &imagesStr,
 	}
 
 	return exercise, nil
@@ -135,7 +134,6 @@ func (w *AsyncWorker) FetchExercises(asyncJobID uint) {
 	var errors int
 
 	for _, externalExercise := range externalExercises {
-		// Check if exercise already exists by external ID
 		var existing models.Exercise
 		result := w.db.DB.Where("external_id = ?", externalExercise.ID).First(&existing)
 		if result.Error == nil {
@@ -165,11 +163,9 @@ func (w *AsyncWorker) FetchExercises(asyncJobID uint) {
 		}
 	}
 
-	log.Printf("Exercise import completed: %d created, %d skipped, %d errors", 
+	log.Printf("Exercise import completed: %d created, %d skipped, %d errors",
 		len(exercises), skipped, errors)
 
-	// Update status to done
 	w.db.DB.Model(&models.AsyncJob{}).Where("id = ?", asyncJobID).Update("status", models.Done)
 	log.Printf("Async job %d completed successfully", asyncJobID)
 }
-
