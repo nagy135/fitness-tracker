@@ -18,7 +18,7 @@ func NewExerciseHandler(db *database.DBInstance) *ExerciseHandler {
 
 func (h *ExerciseHandler) GetExercises(c *fiber.Ctx) error {
 	var exercises []models.Exercise
-	result := h.db.DB.Preload("Records").Find(&exercises)
+	result := h.db.DB.Find(&exercises)
 
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

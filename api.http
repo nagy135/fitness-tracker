@@ -56,3 +56,20 @@ Authorization: Bearer {{accessToken}}
   "name": "viktor",
   "pass": "password_long_enough"
 }
+
+### ======================================== ###
+
+###
+# @name create-async-job-for-exercises
+POST http://localhost:8080/async-jobs
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "type": "fetch-exercises"
+}
+
+###
+# @name get-async-jobs
+GET http://localhost:8080/async-jobs
+Authorization: Bearer {{accessToken}}
