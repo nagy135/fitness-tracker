@@ -2,8 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/nagy135/fitness-tracker/database"
@@ -34,33 +38,116 @@ type ExternalAPIExercise struct {
 	ID               string   `json:"id"`
 }
 
+// downloadImage downloads an image from the external API and saves it locally
+func (w *AsyncWorker) downloadImage(imageURL, localPath string) error {
+	// Create directory if it doesn't exist
+	dir := filepath.Dir(localPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	// Check if file already exists
+	if _, err := os.Stat(localPath); err == nil {
+		return nil // File already exists, skip download
+	}
+
+	// Create HTTP client with timeout
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	resp, err := client.Get(imageURL)
+	if err != nil {
+		return fmt.Errorf("failed to download image: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("HTTP error downloading image: status %d", resp.StatusCode)
+	}
+
+	// Create the file
+	file, err := os.Create(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to create file %s: %w", localPath, err)
+	}
+	defer file.Close()
+
+	// Copy the image data
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to save image: %w", err)
+	}
+
+	return nil
+}
+
+// downloadExerciseImages downloads all images for an exercise
+func (w *AsyncWorker) downloadExerciseImages(external ExternalAPIExercise) ([]string, error) {
+	const baseImageURL = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/"
+	const publicDir = "public/images"
+
+	var localImagePaths []string
+	var downloadErrors int
+
+	for _, imagePath := range external.Images {
+		if imagePath == "" {
+			continue
+		}
+
+		// External image URL
+		imageURL := baseImageURL + imagePath
+
+		// Local file path
+		localPath := filepath.Join(publicDir, imagePath)
+
+		// Download the image
+		if err := w.downloadImage(imageURL, localPath); err != nil {
+			log.Printf("Failed to download image %s for exercise %s: %v", imagePath, external.Name, err)
+			downloadErrors++
+			continue
+		}
+
+		// Store the local path (relative to public directory for serving)
+		localImagePaths = append(localImagePaths, "/images/"+imagePath)
+	}
+
+	if downloadErrors > 0 {
+		log.Printf("Exercise %s: downloaded %d images, %d errors", external.Name, len(localImagePaths), downloadErrors)
+	}
+
+	return localImagePaths, nil
+}
+
+// convertToExercise converts an ExternalAPIExercise to a models.Exercise
 func (w *AsyncWorker) convertToExercise(external ExternalAPIExercise) (models.Exercise, error) {
-	// Convert slices to JSON strings
+	localImagePaths, err := w.downloadExerciseImages(external)
+	if err != nil {
+		return models.Exercise{}, fmt.Errorf("failed to download images: %w", err)
+	}
+
 	primaryMusclesJSON, err := json.Marshal(external.PrimaryMuscles)
 	if err != nil {
 		return models.Exercise{}, err
 	}
 	primaryMusclesStr := string(primaryMusclesJSON)
-	
+
 	secondaryMusclesJSON, err := json.Marshal(external.SecondaryMuscles)
 	if err != nil {
 		return models.Exercise{}, err
 	}
 	secondaryMusclesStr := string(secondaryMusclesJSON)
-	
+
 	instructionsJSON, err := json.Marshal(external.Instructions)
 	if err != nil {
 		return models.Exercise{}, err
 	}
 	instructionsStr := string(instructionsJSON)
-	
-	imagesJSON, err := json.Marshal(external.Images)
+
+	imagesJSON, err := json.Marshal(localImagePaths)
 	if err != nil {
 		return models.Exercise{}, err
 	}
 	imagesStr := string(imagesJSON)
 
-	// Convert strings to pointers where appropriate
 	var level, category *string
 	if external.Level != "" {
 		level = &external.Level
@@ -128,12 +215,34 @@ func (w *AsyncWorker) FetchExercises(asyncJobID uint) {
 
 	log.Printf("Successfully fetched %d exercises from external API", len(externalExercises))
 
-	// Convert and create exercises in batches
+	if err := os.MkdirAll("public/images", 0755); err != nil {
+		log.Printf("Error creating public/images directory: %v", err)
+		w.db.DB.Model(&models.AsyncJob{}).Where("id = ?", asyncJobID).Updates(models.AsyncJob{
+			Status: models.Error,
+			Error:  "Failed to create images directory: " + err.Error(),
+		})
+		return
+	}
+
 	var exercises []models.Exercise
 	var skipped int
 	var errors int
+	var totalImagesDownloaded int
 
-	for _, externalExercise := range externalExercises {
+	// Limit to first 10 exercises for testing
+	const LIMIT_FOR_TESTING = true
+	maxExercises := len(externalExercises)
+	if LIMIT_FOR_TESTING {
+		maxExercises = min(len(externalExercises), 10)
+	}
+
+	log.Printf("Processing first %d exercises (limited for testing)", maxExercises)
+
+	for i := range maxExercises {
+		externalExercise := externalExercises[i]
+
+		log.Printf("Processing exercise %d/%d: %s", i+1, maxExercises, externalExercise.Name)
+
 		var existing models.Exercise
 		result := w.db.DB.Where("external_id = ?", externalExercise.ID).First(&existing)
 		if result.Error == nil {
@@ -149,9 +258,9 @@ func (w *AsyncWorker) FetchExercises(asyncJobID uint) {
 		}
 
 		exercises = append(exercises, exercise)
+		totalImagesDownloaded += len(externalExercise.Images)
 	}
 
-	// Create exercises in database
 	if len(exercises) > 0 {
 		if err := w.db.DB.Create(&exercises).Error; err != nil {
 			log.Printf("Error creating exercises in database: %v", err)
@@ -163,8 +272,8 @@ func (w *AsyncWorker) FetchExercises(asyncJobID uint) {
 		}
 	}
 
-	log.Printf("Exercise import completed: %d created, %d skipped, %d errors",
-		len(exercises), skipped, errors)
+	log.Printf("Exercise import completed: %d created, %d skipped, %d errors, %d images downloaded",
+		len(exercises), skipped, errors, totalImagesDownloaded)
 
 	w.db.DB.Model(&models.AsyncJob{}).Where("id = ?", asyncJobID).Update("status", models.Done)
 	log.Printf("Async job %d completed successfully", asyncJobID)

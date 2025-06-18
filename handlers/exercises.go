@@ -4,16 +4,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/nagy135/fitness-tracker/database"
 	"github.com/nagy135/fitness-tracker/dto"
+	"github.com/nagy135/fitness-tracker/internal/config"
 	"github.com/nagy135/fitness-tracker/models"
 	"github.com/nagy135/fitness-tracker/utils"
 )
 
 type ExerciseHandler struct {
-	db *database.DBInstance
+	db  *database.DBInstance
+	cfg *config.Config
 }
 
-func NewExerciseHandler(db *database.DBInstance) *ExerciseHandler {
-	return &ExerciseHandler{db: db}
+func NewExerciseHandler(db *database.DBInstance, cfg *config.Config) *ExerciseHandler {
+	return &ExerciseHandler{db: db, cfg: cfg}
 }
 
 func (h *ExerciseHandler) GetExercises(c *fiber.Ctx) error {
@@ -24,6 +26,19 @@ func (h *ExerciseHandler) GetExercises(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": result.Error.Error(),
 		})
+	}
+
+	// Transform relative image URLs to full URLs
+	for i := range exercises {
+		exercise := &exercises[i]
+		if len(exercise.Images) > 0 {
+			var fullImageURLs []string
+			for _, imagePath := range exercise.Images {
+				fullURL := h.cfg.Server.BaseURL + imagePath
+				fullImageURLs = append(fullImageURLs, fullURL)
+			}
+			exercise.Images = fullImageURLs
+		}
 	}
 
 	return c.JSON(fiber.Map{

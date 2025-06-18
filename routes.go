@@ -8,9 +8,10 @@ import (
 	"github.com/nagy135/fitness-tracker/internal/config"
 )
 
-// SetupRoutes configures all application routes
 func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
-	// Public routes
+
+	app.Static("/images", "./public/images")
+
 	app.Post("/login", handlers.NewAuthHandler(db, cfg).Login)
 	app.Post("/users", handlers.NewUserHandler(db).CreateUser)
 
@@ -20,13 +21,12 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 		})
 	})
 
-	// JWT middleware for protected routes
+	// JWT middleware for protected routes (everything below requires JWT)
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.JWT.Secret)},
 	}))
 
-	// Protected routes
-	exerciseHandler := handlers.NewExerciseHandler(db)
+	exerciseHandler := handlers.NewExerciseHandler(db, cfg)
 	app.Get("/exercises", exerciseHandler.GetExercises)
 	app.Post("/exercises", exerciseHandler.CreateExercise)
 
