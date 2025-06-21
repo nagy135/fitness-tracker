@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  app :
+  api :
    container_name: fitness-tracker
    working_dir: /app
    image: cosmtrek/air
    env_file:
-     - .env
+     - api/.env
    volumes:
-     - ./:/app
+     - ./api:/app
    ports:
      - 8080:8080
    command: sh -c "air"
