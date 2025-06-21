@@ -1,0 +1,75 @@
+###
+# @name get-all-exercises
+GET http://localhost:8080/exercises
+Authorization: Bearer {{accessToken}}
+
+###
+# @name create-exercise
+POST http://localhost:8080/exercises
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Benchpress"
+}
+
+### ======================================== ###
+
+###
+# @name get-all-records
+GET http://localhost:8080/records
+Authorization: Bearer {{accessToken}}
+
+###
+# @name create-record
+POST http://localhost:8080/records
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "exerciseId": 1,
+  "weight": 100,
+  "feeling": "easy"
+}
+
+### ======================================== ###
+
+###
+# @name login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "name": "viktor",
+  "pass": "password_long_enough"
+}
+
+### ======================================== ###
+
+###
+# @name create-user
+POST http://localhost:8080/users
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "viktor",
+  "pass": "password_long_enough"
+}
+
+### ======================================== ###
+
+###
+# @name create-async-job-for-exercises
+POST http://localhost:8080/async-jobs
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "type": "fetch-exercises"
+}
+
+###
+# @name get-async-jobs
+GET http://localhost:8080/async-jobs
+Authorization: Bearer {{accessToken}}

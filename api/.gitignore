@@ -1,0 +1,4 @@
+.env
+tmp
+http-client.env.json
+public/images
