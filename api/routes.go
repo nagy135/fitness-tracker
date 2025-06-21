@@ -24,6 +24,12 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 	// JWT middleware for protected routes (everything below requires JWT)
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.JWT.Secret)},
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid or expired JWT",
+				"details": err.Error(),
+			})
+		},
 	}))
 
 	exerciseHandler := handlers.NewExerciseHandler(db, cfg)
