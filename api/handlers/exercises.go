@@ -18,6 +18,17 @@ func NewExerciseHandler(db *database.DBInstance, cfg *config.Config) *ExerciseHa
 	return &ExerciseHandler{db: db, cfg: cfg}
 }
 
+// transformImageURLs converts relative image paths to full URLs
+func (h *ExerciseHandler) transformImageURLs(exercise *models.Exercise) {
+	if len(exercise.Images) > 0 {
+		fullImageURLs := make([]string, len(exercise.Images))
+		for i, imagePath := range exercise.Images {
+			fullImageURLs[i] = h.cfg.Server.BaseURL + imagePath
+		}
+		exercise.Images = fullImageURLs
+	}
+}
+
 func (h *ExerciseHandler) GetExercises(c *fiber.Ctx) error {
 	var exercises []models.Exercise
 	result := h.db.DB.Find(&exercises)
@@ -30,21 +41,36 @@ func (h *ExerciseHandler) GetExercises(c *fiber.Ctx) error {
 
 	// Transform relative image URLs to full URLs
 	for i := range exercises {
-		exercise := &exercises[i]
-		if len(exercise.Images) > 0 {
-			var fullImageURLs []string
-			for _, imagePath := range exercise.Images {
-				fullURL := h.cfg.Server.BaseURL + imagePath
-				fullImageURLs = append(fullImageURLs, fullURL)
-			}
-			exercise.Images = fullImageURLs
-		}
+		h.transformImageURLs(&exercises[i])
 	}
 
 	return c.JSON(fiber.Map{
 		"exercises": exercises,
 		"count":     len(exercises),
 	})
+}
+
+func (h *ExerciseHandler) GetExercise(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Exercise ID is required",
+		})
+	}
+
+	var exercise models.Exercise
+	result := h.db.DB.First(&exercise, id)
+
+	if result.Error != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Exercise not found",
+		})
+	}
+
+	// Transform relative image URLs to full URLs
+	h.transformImageURLs(&exercise)
+
+	return c.JSON(exercise)
 }
 
 func (h *ExerciseHandler) CreateExercise(c *fiber.Ctx) error {

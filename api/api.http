@@ -1,11 +1,16 @@
-###
+### 
+
 # @name get-all-exercises
-GET http://localhost:8080/exercises
+
+GET http://localhost:8080/exercises HTTP/1.1
 Authorization: Bearer {{accessToken}}
 
-###
+
+### 
+
 # @name create-exercise
-POST http://localhost:8080/exercises
+
+POST http://localhost:8080/exercises HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -13,30 +18,41 @@ Authorization: Bearer {{accessToken}}
   "name": "Benchpress"
 }
 
+
 ### ======================================== ###
 
-###
+
+### 
+
 # @name get-all-records
-GET http://localhost:8080/records
+
+GET http://localhost:8080/records HTTP/1.1
 Authorization: Bearer {{accessToken}}
 
-###
+
+### 
+
 # @name create-record
-POST http://localhost:8080/records
+
+POST http://localhost:8080/records HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
   "exerciseId": 1,
-  "weight": 100,
-  "feeling": "easy"
+  "feeling": "easy",
+  "weight": 100
 }
+
 
 ### ======================================== ###
 
-###
+
+### 
+
 # @name login
-POST http://localhost:8080/login
+
+POST http://localhost:8080/login HTTP/1.1
 Content-Type: application/json
 
 {
@@ -44,24 +60,32 @@ Content-Type: application/json
   "pass": "password_long_enough"
 }
 
+
 ### ======================================== ###
 
-###
+
+### 
+
 # @name create-user
-POST http://localhost:8080/users
+
+POST http://localhost:8080/users HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
   "name": "viktor",
-  "pass": "password_long_enough"
+  "pass": "mypassword"
 }
+
 
 ### ======================================== ###
 
-###
+
+### 
+
 # @name create-async-job-for-exercises
-POST http://localhost:8080/async-jobs
+
+POST http://localhost:8080/async-jobs HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -69,7 +93,10 @@ Authorization: Bearer {{accessToken}}
   "type": "fetch-exercises"
 }
 
-###
+
+### 
+
 # @name get-async-jobs
-GET http://localhost:8080/async-jobs
+
+GET http://localhost:8080/async-jobs HTTP/1.1
 Authorization: Bearer {{accessToken}}

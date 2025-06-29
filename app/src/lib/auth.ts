@@ -1,3 +1,5 @@
+import { API_CONFIG } from '@/lib/config/api';
+
 export interface LoginCredentials {
   name: string;
   pass: string;
@@ -9,10 +11,9 @@ export interface LoginResponse {
 
 export class AuthService {
   private static readonly TOKEN_KEY = 'fitness_tracker_token';
-  private static readonly BASE_URL = 'http://localhost:8080';
 
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await fetch(`${this.BASE_URL}/login`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

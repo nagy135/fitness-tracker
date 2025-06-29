@@ -1,11 +1,18 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/hooks/useAuth';
-import { useExercisesQuery } from '@/lib/queries/useExercisesQuery';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { useExercisesQuery } from "@/lib/queries/useExercisesQuery";
+import { formatDate } from "@/lib/utils/date";
 
 export default function ExercisesPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -14,7 +21,7 @@ export default function ExercisesPage() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push('/');
+      router.push("/");
     }
   }, [isAuthenticated, authLoading, router]);
 
@@ -37,21 +44,20 @@ export default function ExercisesPage() {
           <div>
             <h1 className="text-3xl font-bold">Exercises</h1>
             <p className="text-gray-600 mt-2">
-              {data ? `${data.count} exercise${data.count !== 1 ? 's' : ''} found` : 'Loading exercises...'}
+              {data
+                ? `${data.count} exercise${data.count !== 1 ? "s" : ""} found`
+                : "Loading exercises..."}
             </p>
           </div>
           <div className="space-x-4">
-            <Button 
+            <Button
               onClick={() => refetch()}
               variant="outline"
               disabled={isLoading}
             >
-              {isLoading ? 'Refreshing...' : 'Refresh'}
+              {isLoading ? "Refreshing..." : "Refresh"}
             </Button>
-            <Button 
-              onClick={() => router.push('/')}
-              variant="outline"
-            >
+            <Button onClick={() => router.push("/")} variant="outline">
               Back to Home
             </Button>
           </div>
@@ -63,7 +69,7 @@ export default function ExercisesPage() {
               <div className="text-red-800">
                 <h3 className="font-semibold mb-2">Error loading exercises</h3>
                 <p>{error}</p>
-                <Button 
+                <Button
                   onClick={() => refetch()}
                   className="mt-4"
                   variant="outline"
@@ -85,17 +91,28 @@ export default function ExercisesPage() {
         {data && data.exercises && data.exercises.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.exercises.map((exercise) => (
-              <Card key={exercise.id} className="hover:shadow-md transition-shadow">
+              <Card
+                key={exercise.id}
+                className="hover:shadow-md transition-shadow"
+              >
                 <CardHeader>
                   <CardTitle className="text-lg">{exercise.name}</CardTitle>
-                  <CardDescription>
-                    Exercise ID: {exercise.id}
-                  </CardDescription>
+                  <CardDescription>Exercise ID: {exercise.id}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p>Created: {new Date(exercise.created_at).toLocaleDateString()}</p>
-                    <p>Updated: {new Date(exercise.updated_at).toLocaleDateString()}</p>
+                    <p>Created: {formatDate(exercise.createdAt)}</p>
+                    <p>Updated: {formatDate(exercise.updatedAt)}</p>
+                  </div>
+                  <div className="mt-4">
+                    <Button
+                      onClick={() => router.push(`/exercises/${exercise.id}`)}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      View Details
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -116,4 +133,5 @@ export default function ExercisesPage() {
       </div>
     </div>
   );
-} 
+}
+
