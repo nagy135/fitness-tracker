@@ -73,6 +73,31 @@ func (h *ExerciseHandler) GetExercise(c *fiber.Ctx) error {
 	return c.JSON(exercise)
 }
 
+func (h *ExerciseHandler) GetExerciseOptions(c *fiber.Ctx) error {
+	var exercises []models.Exercise
+	result := h.db.DB.Select("id, name").Find(&exercises)
+
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": result.Error.Error(),
+		})
+	}
+
+	// Create lightweight response with just ID and name
+	options := make([]fiber.Map, len(exercises))
+	for i, exercise := range exercises {
+		options[i] = fiber.Map{
+			"id":   exercise.ID,
+			"name": exercise.Name,
+		}
+	}
+
+	return c.JSON(fiber.Map{
+		"exercises": options,
+		"count":     len(options),
+	})
+}
+
 func (h *ExerciseHandler) CreateExercise(c *fiber.Ctx) error {
 	var exerciseDto dto.ExerciseDto
 	if err := c.BodyParser(&exerciseDto); err != nil {

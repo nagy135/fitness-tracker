@@ -26,7 +26,7 @@ func (h *RecordHandler) GetRecords(c *fiber.Ctx) error {
 	}
 
 	var records []models.Record
-	result := h.db.DB.Preload("Exercise").Where("user_id = ?", userID).Find(&records)
+	result := h.db.DB.Preload("Exercise").Preload("Reps").Where("user_id = ?", userID).Find(&records)
 
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -62,19 +62,46 @@ func (h *RecordHandler) CreateRecord(c *fiber.Ctx) error {
 		})
 	}
 
+	// Start a transaction
+	tx := h.db.DB.Begin()
+
+	// Create the record
 	record := models.Record{
-		Weight:     recordDto.Weight,
-		Feeling:    models.Feeling(recordDto.Feeling),
 		ExerciseID: recordDto.ExerciseID,
 		UserID:     userID,
 	}
 
-	result := h.db.DB.Create(&record)
-	if result.Error != nil {
+	if err := tx.Create(&record).Error; err != nil {
+		tx.Rollback()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": result.Error.Error(),
+			"error": err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(record)
+	// Create the reps
+	var reps []models.Rep
+	for _, repDto := range recordDto.Reps {
+		rep := models.Rep{
+			Weight:   repDto.Weight,
+			Feeling:  models.Feeling(repDto.Feeling),
+			RecordID: record.ID,
+		}
+		reps = append(reps, rep)
+	}
+
+	if err := tx.Create(&reps).Error; err != nil {
+		tx.Rollback()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// Commit the transaction
+	tx.Commit()
+
+	// Load the complete record with relationships
+	var completeRecord models.Record
+	h.db.DB.Preload("Exercise").Preload("Reps").First(&completeRecord, record.ID)
+
+	return c.Status(fiber.StatusCreated).JSON(completeRecord)
 }

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { LoginForm } from '@/components/LoginForm';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { LoginForm } from "@/components/LoginForm";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
   const { isAuthenticated, isLoading, logout } = useAuth();
@@ -24,23 +24,35 @@ export default function Home() {
         <div className="w-full max-w-md mx-auto space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-2">Fitness Tracker</h1>
-            <p className="text-gray-600 mb-8">Welcome back! You're logged in.</p>
+            <p className="text-gray-600 mb-8">
+              Welcome back! You're logged in.
+            </p>
           </div>
-          
+
           <div className="space-y-4">
-            <Button 
-              onClick={() => router.push('/exercises')}
+            <Button
+              onClick={() => router.push("/exercises")}
               className="w-full"
               size="lg"
             >
               Exercises
             </Button>
-            
-            <Button 
-              onClick={logout}
-              variant="outline"
+            <Button
+              onClick={() => router.push("/records")}
               className="w-full"
+              size="lg"
             >
+              Records
+            </Button>
+            <Button
+              onClick={() => router.push("/statistics")}
+              className="w-full"
+              size="lg"
+            >
+              Statistics
+            </Button>
+
+            <Button onClick={logout} variant="outline" className="w-full">
               Logout
             </Button>
           </div>

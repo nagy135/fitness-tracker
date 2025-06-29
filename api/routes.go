@@ -34,6 +34,7 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 
 	exerciseHandler := handlers.NewExerciseHandler(db, cfg)
 	app.Get("/exercises", exerciseHandler.GetExercises)
+	app.Get("/exercises/options", exerciseHandler.GetExerciseOptions)
 	app.Get("/exercises/:id", exerciseHandler.GetExercise)
 	app.Post("/exercises", exerciseHandler.CreateExercise)
 
