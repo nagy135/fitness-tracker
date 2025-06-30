@@ -22,7 +22,14 @@ interface ProgressChartProps {
   exerciseStats: ExerciseStatistics;
 }
 
-function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) {
+interface TooltipPayload {
+  payload: {
+    totalWeight: number;
+    recordCount: number;
+  };
+}
+
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: TooltipPayload[]; label?: string }) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
