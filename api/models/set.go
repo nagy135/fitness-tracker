@@ -6,14 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type Rep struct {
+type Set struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `json:"deletedAt,omitempty" gorm:"index"`
 
-	Weight  float32 `json:"weight"`
-	Feeling Feeling `json:"feeling"`
+	Reps   int     `json:"reps"`
+	Weight float32 `json:"weight"`
 
 	RecordID uint `json:"recordId"`
 } 

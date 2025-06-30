@@ -2,7 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  ignoreBuildErrors: true,
+  images: {
+    remotePatterns: [
+      new URL("https://fit-api.infiniter.tech/**"),
+      new URL("http://localhost:8080/**"),
+    ],
+  },
   /* config options here */
 };
 

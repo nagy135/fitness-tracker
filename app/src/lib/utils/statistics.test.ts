@@ -10,9 +10,9 @@ const mockRecords: WorkoutRecord[] = [
     exerciseId: 1,
     exercise: { id: 1, name: 'Bench Press', createdAt: '', updatedAt: '' },
     userId: 1,
-    reps: [
-      { id: 1, weight: 100, feeling: 'normal', recordId: 1, createdAt: '', updatedAt: '' },
-      { id: 2, weight: 105, feeling: 'hard', recordId: 1, createdAt: '', updatedAt: '' },
+    sets: [
+      { id: 1, reps: 10, weight: 100, recordId: 1, createdAt: '', updatedAt: '' },
+      { id: 2, reps: 8, weight: 105, recordId: 1, createdAt: '', updatedAt: '' },
     ]
   },
   {
@@ -22,9 +22,9 @@ const mockRecords: WorkoutRecord[] = [
     exerciseId: 1,
     exercise: { id: 1, name: 'Bench Press', createdAt: '', updatedAt: '' },
     userId: 1,
-    reps: [
-      { id: 3, weight: 110, feeling: 'normal', recordId: 2, createdAt: '', updatedAt: '' },
-      { id: 4, weight: 115, feeling: 'hard', recordId: 2, createdAt: '', updatedAt: '' },
+    sets: [
+      { id: 3, reps: 12, weight: 110, recordId: 2, createdAt: '', updatedAt: '' },
+      { id: 4, reps: 6, weight: 115, recordId: 2, createdAt: '', updatedAt: '' },
     ]
   },
   {
@@ -34,8 +34,8 @@ const mockRecords: WorkoutRecord[] = [
     exerciseId: 2,
     exercise: { id: 2, name: 'Squat', createdAt: '', updatedAt: '' },
     userId: 1,
-    reps: [
-      { id: 5, weight: 150, feeling: 'easy', recordId: 3, createdAt: '', updatedAt: '' },
+    sets: [
+      { id: 5, reps: 15, weight: 150, recordId: 3, createdAt: '', updatedAt: '' },
     ]
   }
 ];

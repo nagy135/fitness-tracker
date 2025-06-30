@@ -6,14 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type Feeling string
-
-const (
-	Easy   Feeling = "easy"
-	Normal Feeling = "normal"
-	Hard   Feeling = "hard"
-)
-
 type Record struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	CreatedAt time.Time      `json:"createdAt"`
@@ -23,6 +15,6 @@ type Record struct {
 	ExerciseID uint     `json:"exerciseId"`
 	Exercise   Exercise `json:"exercise" gorm:"foreignKey:ExerciseID"`
 	UserID     uint     `json:"userId"`
-	Reps       []Rep    `json:"reps"`
+	Sets       []Set    `json:"sets"`
 	Date       *time.Time `json:"date,omitempty"`
 }

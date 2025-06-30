@@ -1,11 +1,11 @@
 import { Exercise } from './exercise';
 
-export interface Rep {
+export interface Set {
   id: number;
   createdAt: string;
   updatedAt: string;
+  reps: number;
   weight: number;
-  feeling: 'easy' | 'normal' | 'hard';
   recordId: number;
 }
 
@@ -16,7 +16,7 @@ export interface Record {
   exerciseId: number;
   exercise: Exercise;
   userId: number;
-  reps: Rep[];
+  sets: Set[];
   date?: string;
 }
 
@@ -25,14 +25,14 @@ export interface RecordsResponse {
   count: number;
 }
 
-export interface CreateRepRequest {
+export interface CreateSetRequest {
+  reps: number;
   weight: number;
-  feeling: 'easy' | 'normal' | 'hard';
 }
 
 export interface CreateRecordRequest {
   exerciseId: number;
-  reps: CreateRepRequest[];
+  sets: CreateSetRequest[];
   date?: string;
 }
 

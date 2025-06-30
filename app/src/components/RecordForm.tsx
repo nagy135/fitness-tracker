@@ -26,19 +26,20 @@ import { useExerciseOptionsQuery } from "@/lib/queries/useExerciseOptionsQuery";
 import { RecordsAPI } from "@/lib/api/records";
 import { CreateRecordRequest } from "@/lib/types/record";
 
-const repSchema = z.object({
+const setSchema = z.object({
+  reps: z.string().min(1, "Reps is required").refine(
+    (val) => !isNaN(parseInt(val)) && parseInt(val) > 0,
+    "Reps must be a positive number"
+  ),
   weight: z.string().min(1, "Weight is required").refine(
     (val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0,
     "Weight must be a positive number"
   ),
-  feeling: z.enum(["easy", "normal", "hard"], {
-    required_error: "Please select how the rep felt",
-  }),
 });
 
 const recordSchema = z.object({
   exerciseId: z.number().min(1, "Please select an exercise").optional(),
-  reps: z.array(repSchema).min(1, "At least one rep is required"),
+  sets: z.array(setSchema).min(1, "At least one set is required"),
   date: z.string().optional(),
 });
 
@@ -166,7 +167,7 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
 
   const defaultValues: RecordFormData = {
     exerciseId: undefined,
-    reps: [{ weight: "", feeling: "normal" }],
+    sets: [{ reps: "", weight: "" }],
     date: getTodayDate(),
   };
 
@@ -177,7 +178,7 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "reps",
+    name: "sets",
   });
 
   const onSubmit = async (data: RecordFormData) => {
@@ -192,9 +193,9 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
 
       const request: CreateRecordRequest = {
         exerciseId: data.exerciseId,
-        reps: data.reps.map(rep => ({
-          weight: parseFloat(rep.weight),
-          feeling: rep.feeling,
+        sets: data.sets.map(set => ({
+          reps: parseInt(set.reps),
+          weight: parseFloat(set.weight),
         })),
         ...(showDateField && data.date ? { date: data.date } : {}),
       };
@@ -202,7 +203,7 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
       await RecordsAPI.createRecord(request);
       form.reset({
         exerciseId: undefined,
-        reps: [{ weight: "", feeling: "normal" }],
+        sets: [{ reps: "", weight: "" }],
         date: getTodayDate(),
       });
       onSuccess();
@@ -213,11 +214,11 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
     }
   };
 
-  const addRep = () => {
-    append({ weight: "", feeling: "normal" });
+  const addSet = () => {
+    append({ reps: "", weight: "" });
   };
 
-  const removeRep = (index: number) => {
+  const removeSet = (index: number) => {
     if (fields.length > 1) {
       remove(index);
     }
@@ -289,14 +290,14 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <FormLabel className="text-base font-medium">Reps</FormLabel>
+                <FormLabel className="text-base font-medium">Sets</FormLabel>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={addRep}
+                  onClick={addSet}
                 >
-                  Add Rep
+                  Add Set
                 </Button>
               </div>
 
@@ -306,7 +307,26 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                     <div className="flex-1 space-y-4">
                       <FormField
                         control={form.control}
-                        name={`reps.${index}.weight`}
+                        name={`sets.${index}.reps`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Reps</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1"
+                                placeholder="Enter reps count"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`sets.${index}.weight`}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Weight (kg)</FormLabel>
@@ -323,24 +343,6 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                           </FormItem>
                         )}
                       />
-
-                      <FormField
-                        control={form.control}
-                        name={`reps.${index}.feeling`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>How did it feel?</FormLabel>
-                            <FormControl>
-                              <Select placeholder="Select feeling" {...field}>
-                                <option value="easy">Easy</option>
-                                <option value="normal">Normal</option>
-                                <option value="hard">Hard</option>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
                     </div>
 
                     {fields.length > 1 && (
@@ -348,7 +350,7 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeRep(index)}
+                        onClick={() => removeSet(index)}
                         className="mt-6"
                       >
                         Remove

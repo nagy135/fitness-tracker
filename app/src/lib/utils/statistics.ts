@@ -43,7 +43,7 @@ export function processRecordsForStatistics(records: WorkoutRecord[]): ExerciseS
     sortedRecords.forEach(record => {
       const recordDate = getRecordDate(record);
       const date = new Date(recordDate).toISOString().split('T')[0]; // YYYY-MM-DD format
-      const totalWeight = record.reps.reduce((sum, rep) => sum + rep.weight, 0);
+      const totalWeight = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
       
       if (progressMap.has(date)) {
         const existing = progressMap.get(date)!;

@@ -27,7 +27,7 @@ func (h *RecordHandler) GetRecords(c *fiber.Ctx) error {
 	}
 
 	var records []models.Record
-	result := h.db.DB.Preload("Exercise").Preload("Reps").Where("user_id = ?", userID).Find(&records)
+	result := h.db.DB.Preload("Exercise").Preload("Sets").Where("user_id = ?", userID).Find(&records)
 
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -86,18 +86,18 @@ func (h *RecordHandler) CreateRecord(c *fiber.Ctx) error {
 		})
 	}
 
-	// Create the reps
-	var reps []models.Rep
-	for _, repDto := range recordDto.Reps {
-		rep := models.Rep{
-			Weight:   repDto.Weight,
-			Feeling:  models.Feeling(repDto.Feeling),
+	// Create the sets
+	var sets []models.Set
+	for _, setDto := range recordDto.Sets {
+		set := models.Set{
+			Reps:     setDto.Reps,
+			Weight:   setDto.Weight,
 			RecordID: record.ID,
 		}
-		reps = append(reps, rep)
+		sets = append(sets, set)
 	}
 
-	if err := tx.Create(&reps).Error; err != nil {
+	if err := tx.Create(&sets).Error; err != nil {
 		tx.Rollback()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -109,7 +109,7 @@ func (h *RecordHandler) CreateRecord(c *fiber.Ctx) error {
 
 	// Load the complete record with relationships
 	var completeRecord models.Record
-	h.db.DB.Preload("Exercise").Preload("Reps").First(&completeRecord, record.ID)
+	h.db.DB.Preload("Exercise").Preload("Sets").First(&completeRecord, record.ID)
 
 	return c.Status(fiber.StatusCreated).JSON(completeRecord)
 }

@@ -51,7 +51,7 @@ func runMigrations(db *gorm.DB) error {
 		&models.User{},
 		&models.Exercise{},
 		&models.Record{},
-		&models.Rep{},
+		&models.Set{},
 		&models.AsyncJob{},
 	}
 

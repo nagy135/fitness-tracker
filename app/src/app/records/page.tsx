@@ -16,23 +16,9 @@ import { RecordForm } from "@/components/RecordForm";
 import { formatDateTime } from "@/lib/utils/date";
 import { Record } from "@/lib/types/record";
 
-function FeelingBadge({ feeling }: { feeling: string }) {
-  const colorMap = {
-    easy: "bg-green-100 text-green-800",
-    normal: "bg-yellow-100 text-yellow-800", 
-    hard: "bg-red-100 text-red-800",
-  };
-  
-  return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorMap[feeling as keyof typeof colorMap]}`}>
-      {feeling.charAt(0).toUpperCase() + feeling.slice(1)}
-    </span>
-  );
-}
-
 function RecordCard({ record }: { record: Record }) {
-  const totalWeight = record.reps.reduce((sum, rep) => sum + rep.weight, 0);
-  const averageWeight = totalWeight / record.reps.length;
+  const totalVolume = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+  const averageWeight = record.sets.reduce((sum, set) => sum + set.weight, 0) / record.sets.length;
   
   // Use custom date if available, otherwise use createdAt
   const displayDate = record.date ? record.date : record.createdAt;
@@ -44,7 +30,7 @@ function RecordCard({ record }: { record: Record }) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{record.exercise.name}</CardTitle>
           <div className="text-sm text-gray-500">
-            {record.reps.length} rep{record.reps.length !== 1 ? 's' : ''}
+            {record.sets.length} set{record.sets.length !== 1 ? 's' : ''}
           </div>
         </div>
         <CardDescription>
@@ -60,24 +46,26 @@ function RecordCard({ record }: { record: Record }) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-2xl font-bold">
-              {averageWeight.toFixed(1)} kg avg
+              {totalVolume.toFixed(1)} kg total
             </div>
             <div className="text-sm text-gray-500">Record #{record.id}</div>
           </div>
           
           <div className="space-y-2">
-            <div className="text-sm font-medium">Reps:</div>
+            <div className="text-sm font-medium">Sets:</div>
             <div className="grid gap-2">
-              {record.reps.map((rep, index) => (
+              {record.sets.map((set, index) => (
                 <div
-                  key={rep.id}
+                  key={set.id}
                   className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
                 >
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">#{index + 1}</span>
-                    <span className="font-medium">{rep.weight} kg</span>
+                    <span className="font-medium">{set.reps} × {set.weight} kg</span>
                   </div>
-                  <FeelingBadge feeling={rep.feeling} />
+                  <div className="text-sm text-gray-600">
+                    {(set.reps * set.weight).toFixed(1)} kg
+                  </div>
                 </div>
               ))}
             </div>
