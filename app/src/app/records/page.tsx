@@ -18,7 +18,6 @@ import { Record } from "@/lib/types/record";
 
 function RecordCard({ record }: { record: Record }) {
   const totalVolume = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
-  const averageWeight = record.sets.reduce((sum, set) => sum + set.weight, 0) / record.sets.length;
   
   // Use custom date if available, otherwise use createdAt
   const displayDate = record.date ? record.date : record.createdAt;

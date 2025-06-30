@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -27,14 +26,20 @@ import { RecordsAPI } from "@/lib/api/records";
 import { CreateRecordRequest } from "@/lib/types/record";
 
 const setSchema = z.object({
-  reps: z.string().min(1, "Reps is required").refine(
-    (val) => !isNaN(parseInt(val)) && parseInt(val) > 0,
-    "Reps must be a positive number"
-  ),
-  weight: z.string().min(1, "Weight is required").refine(
-    (val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0,
-    "Weight must be a positive number"
-  ),
+  reps: z
+    .string()
+    .min(1, "Reps is required")
+    .refine(
+      (val) => !isNaN(parseInt(val)) && parseInt(val) > 0,
+      "Reps must be a positive number",
+    ),
+  weight: z
+    .string()
+    .min(1, "Weight is required")
+    .refine(
+      (val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0,
+      "Weight must be a positive number",
+    ),
 });
 
 const recordSchema = z.object({
@@ -63,24 +68,26 @@ interface SearchableExerciseSelectorProps {
   placeholder?: string;
 }
 
-function SearchableExerciseSelector({ 
-  exercises, 
-  value, 
-  onChange, 
+function SearchableExerciseSelector({
+  exercises,
+  value,
+  onChange,
   disabled = false,
-  placeholder = "Search and select an exercise..." 
+  placeholder = "Search and select an exercise...",
 }: SearchableExerciseSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   // Update search term when value prop changes
   React.useEffect(() => {
-    const exercise = value ? exercises.find(ex => ex.id === value) || null : null;
+    const exercise = value
+      ? exercises.find((ex) => ex.id === value) || null
+      : null;
     setSearchTerm(exercise ? exercise.name : "");
   }, [value, exercises]);
 
-  const filteredExercises = exercises.filter(exercise =>
-    exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredExercises = exercises.filter((exercise) =>
+    exercise.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleSelectExercise = (exercise: Exercise) => {
@@ -93,7 +100,7 @@ function SearchableExerciseSelector({
     const term = e.target.value;
     setSearchTerm(term);
     setIsOpen(true);
-    
+
     // If the input is cleared, reset the selection
     if (term === "") {
       onChange(undefined);
@@ -110,7 +117,7 @@ function SearchableExerciseSelector({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       setIsOpen(false);
     }
   };
@@ -128,7 +135,7 @@ function SearchableExerciseSelector({
         disabled={disabled}
         className="w-full"
       />
-      
+
       {isOpen && filteredExercises.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
           {filteredExercises.map((exercise) => (
@@ -142,14 +149,14 @@ function SearchableExerciseSelector({
           ))}
         </div>
       )}
-      
-              {isOpen && filteredExercises.length === 0 && searchTerm && (
-          <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg">
-            <div className="px-3 py-2 text-sm text-muted-foreground">
-              No exercises found matching &quot;{searchTerm}&quot;
-            </div>
+
+      {isOpen && filteredExercises.length === 0 && searchTerm && (
+        <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg">
+          <div className="px-3 py-2 text-sm text-muted-foreground">
+            No exercises found matching &quot;{searchTerm}&quot;
           </div>
-        )}
+        </div>
+      )}
     </div>
   );
 }
@@ -160,9 +167,9 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
   const [showDateField, setShowDateField] = useState(false);
   const { data: exerciseOptions, isLoading: exercisesLoading } =
     useExerciseOptionsQuery();
-  
+
   const getTodayDate = () => {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
   };
 
   const defaultValues: RecordFormData = {
@@ -193,7 +200,7 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
 
       const request: CreateRecordRequest = {
         exerciseId: data.exerciseId,
-        sets: data.sets.map(set => ({
+        sets: data.sets.map((set) => ({
           reps: parseInt(set.reps),
           weight: parseFloat(set.weight),
         })),
@@ -245,7 +252,11 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                       value={field.value}
                       onChange={field.onChange}
                       disabled={exercisesLoading}
-                      placeholder={exercisesLoading ? "Loading exercises..." : "Search and select an exercise..."}
+                      placeholder={
+                        exercisesLoading
+                          ? "Loading exercises..."
+                          : "Search and select an exercise..."
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -262,7 +273,10 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                   onChange={(e) => setShowDateField(e.target.checked)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="show-date" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="show-date"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Set custom date
                 </label>
               </div>
@@ -380,4 +394,3 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
     </Card>
   );
 }
-
