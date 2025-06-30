@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginForm } from "@/components/LoginForm";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ export default function Home() {
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-2">Fitness Tracker</h1>
             <p className="text-gray-600 mb-8">
-              Welcome back! You're logged in.
+              Welcome back! You&apos;re logged in.
             </p>
           </div>
 

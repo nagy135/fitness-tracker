@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { ProgressChart } from "@/components/ProgressChart";
 import { useRecordsQuery } from "@/lib/queries/useRecordsQuery";
-import { processRecordsForStatistics, ExerciseStatistics } from "@/lib/utils/statistics";
+import { processRecordsForStatistics } from "@/lib/utils/statistics";
 
 export function ProgressPerExercise() {
   const { data: recordsData, isLoading, error } = useRecordsQuery();
@@ -71,7 +71,7 @@ export function ProgressPerExercise() {
         <CardContent>
           <div className="text-center text-gray-500 py-8">
             <h3 className="font-semibold mb-2">No exercise data found</h3>
-            <p>Your workout records don't contain exercise information.</p>
+            <p>Your workout records don&apos;t contain exercise information.</p>
           </div>
         </CardContent>
       </Card>

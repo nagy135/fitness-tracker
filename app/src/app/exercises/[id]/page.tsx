@@ -2,6 +2,7 @@
 
 import { useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
@@ -127,10 +128,12 @@ export default function ExerciseDetailPage({ params }: ExerciseDetailPageProps) 
                           <p className="font-medium">Images:</p>
                           <div className="grid gap-2 mt-2">
                             {exercise.images.map((image, index) => (
-                              <img 
+                              <Image
                                 key={index}
                                 src={image} 
                                 alt={`${exercise.name} image ${index + 1}`}
+                                width={400}
+                                height={300}
                                 className="w-full max-w-sm rounded-lg border"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';

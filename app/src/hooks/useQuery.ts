@@ -48,6 +48,7 @@ export function useQuery<T>(
     } else if (!enabled) {
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, ...dependencies]);
 
   const refetch = async (): Promise<void> => {

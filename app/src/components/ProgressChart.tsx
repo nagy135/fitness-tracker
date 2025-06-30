@@ -22,12 +22,12 @@ interface ProgressChartProps {
   exerciseStats: ExerciseStatistics;
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string }) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
       <div className="bg-white p-3 border rounded-lg shadow-lg">
-        <p className="font-medium">{formatDate(label)}</p>
+        <p className="font-medium">{formatDate(label || '')}</p>
         <p className="text-blue-600">
           Total Weight: <span className="font-bold">{data.totalWeight} kg</span>
         </p>

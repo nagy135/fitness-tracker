@@ -12,7 +12,7 @@ export function formatDate(dateString: string | null | undefined): string {
     }
     
     return date.toLocaleDateString();
-  } catch (error) {
+  } catch {
     return 'Invalid Date';
   }
 }
@@ -31,7 +31,7 @@ export function formatDateTime(dateString: string | null | undefined): string {
     }
     
     return date.toLocaleString();
-  } catch (error) {
+  } catch {
     return 'Invalid Date';
   }
 } 
