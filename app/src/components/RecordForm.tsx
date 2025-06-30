@@ -71,12 +71,10 @@ function SearchableExerciseSelector({
 }: SearchableExerciseSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
-  // Update selected exercise when value prop changes
+  // Update search term when value prop changes
   React.useEffect(() => {
     const exercise = value ? exercises.find(ex => ex.id === value) || null : null;
-    setSelectedExercise(exercise);
     setSearchTerm(exercise ? exercise.name : "");
   }, [value, exercises]);
 
@@ -85,7 +83,6 @@ function SearchableExerciseSelector({
   );
 
   const handleSelectExercise = (exercise: Exercise) => {
-    setSelectedExercise(exercise);
     setSearchTerm(exercise.name);
     setIsOpen(false);
     onChange(exercise.id);
@@ -98,7 +95,6 @@ function SearchableExerciseSelector({
     
     // If the input is cleared, reset the selection
     if (term === "") {
-      setSelectedExercise(null);
       onChange(undefined);
     }
   };
@@ -146,13 +142,13 @@ function SearchableExerciseSelector({
         </div>
       )}
       
-      {isOpen && filteredExercises.length === 0 && searchTerm && (
-        <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg">
-          <div className="px-3 py-2 text-sm text-muted-foreground">
-            No exercises found matching "{searchTerm}"
+              {isOpen && filteredExercises.length === 0 && searchTerm && (
+          <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg">
+            <div className="px-3 py-2 text-sm text-muted-foreground">
+              No exercises found matching &quot;{searchTerm}&quot;
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }
