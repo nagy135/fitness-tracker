@@ -12,6 +12,19 @@ services:
    ports:
      - 8080:8080
    command: sh -c "air"
+   
+  frontend:
+    container_name: fitness-tracker-frontend
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=production
+      
   db:
     image: postgres:alpine
     env_file:
