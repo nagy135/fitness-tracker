@@ -34,6 +34,10 @@ function RecordCard({ record }: { record: Record }) {
   const totalWeight = record.reps.reduce((sum, rep) => sum + rep.weight, 0);
   const averageWeight = totalWeight / record.reps.length;
   
+  // Use custom date if available, otherwise use createdAt
+  const displayDate = record.date ? record.date : record.createdAt;
+  const isCustomDate = !!record.date;
+  
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -43,7 +47,14 @@ function RecordCard({ record }: { record: Record }) {
             {record.reps.length} rep{record.reps.length !== 1 ? 's' : ''}
           </div>
         </div>
-        <CardDescription>{formatDateTime(record.createdAt)}</CardDescription>
+        <CardDescription>
+          {isCustomDate ? formatDateTime(displayDate) : formatDateTime(record.createdAt)}
+          {isCustomDate && (
+            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+              Custom Date
+            </span>
+          )}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -168,7 +179,12 @@ export default function RecordsPage() {
                 <h2 className="text-xl font-semibold">Your Records</h2>
                 <div className="grid gap-4">
                   {data.records
-                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Sort by newest first
+                    .sort((a, b) => {
+                      // Sort by custom date if available, otherwise by createdAt
+                      const dateA = a.date ? new Date(a.date).getTime() : new Date(a.createdAt).getTime();
+                      const dateB = b.date ? new Date(b.date).getTime() : new Date(b.createdAt).getTime();
+                      return dateB - dateA; // Sort by newest first
+                    })
                     .map((record) => (
                     <RecordCard key={record.id} record={record} />
                   ))}

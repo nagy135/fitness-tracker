@@ -65,6 +65,30 @@ Authorization: Bearer {{accessToken}}
 }
 
 
+### 
+
+# @name create-record-with-date
+
+POST http://localhost:8080/records HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "exerciseId": 1,
+  "reps": [
+    {
+      "weight": 100,
+      "feeling": "easy"
+    },
+    {
+      "weight": 105,
+      "feeling": "normal"
+    }
+  ],
+  "date": "2024-01-15"
+}
+
+
 ### ======================================== ###
 
 

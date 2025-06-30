@@ -37,8 +37,9 @@ const repSchema = z.object({
 });
 
 const recordSchema = z.object({
-  exerciseId: z.number().min(1, "Please select an exercise"),
+  exerciseId: z.number().min(1, "Please select an exercise").optional(),
   reps: z.array(repSchema).min(1, "At least one rep is required"),
+  date: z.string().optional(),
 });
 
 type RecordFormData = z.infer<typeof recordSchema>;
@@ -50,12 +51,18 @@ interface RecordFormProps {
 export function RecordForm({ onSuccess }: RecordFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDateField, setShowDateField] = useState(false);
   const { data: exerciseOptions, isLoading: exercisesLoading } =
     useExerciseOptionsQuery();
+  
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
 
   const defaultValues: RecordFormData = {
-    exerciseId: 0,
+    exerciseId: undefined,
     reps: [{ weight: "", feeling: "normal" }],
+    date: getTodayDate(),
   };
 
   const form = useForm<RecordFormData>({
@@ -73,16 +80,26 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
     setError(null);
 
     try {
+      if (!data.exerciseId || data.exerciseId < 1) {
+        setError("Please select an exercise");
+        return;
+      }
+
       const request: CreateRecordRequest = {
         exerciseId: data.exerciseId,
         reps: data.reps.map(rep => ({
           weight: parseFloat(rep.weight),
           feeling: rep.feeling,
         })),
+        ...(showDateField && data.date ? { date: data.date } : {}),
       };
 
       await RecordsAPI.createRecord(request);
-      form.reset(defaultValues);
+      form.reset({
+        exerciseId: undefined,
+        reps: [{ weight: "", feeling: "normal" }],
+        date: getTodayDate(),
+      });
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create record");
@@ -121,11 +138,13 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                       placeholder="Select an exercise"
                       {...field}
                       value={field.value?.toString() || ""}
-                      onChange={(e) =>
-                        field.onChange(parseInt(e.target.value) || undefined)
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? undefined : parseInt(value));
+                      }}
                       disabled={exercisesLoading}
                     >
+                      <option value="">Select an exercise</option>
                       {exerciseOptions?.exercises.map((exercise) => (
                         <option key={exercise.id} value={exercise.id}>
                           {exercise.name}
@@ -137,6 +156,41 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                 </FormItem>
               )}
             />
+
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="show-date"
+                  checked={showDateField}
+                  onChange={(e) => setShowDateField(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="show-date" className="text-sm font-medium text-gray-700">
+                  Set custom date
+                </label>
+              </div>
+
+              {showDateField && (
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value || getTodayDate()}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">

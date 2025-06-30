@@ -24,4 +24,5 @@ type Record struct {
 	Exercise   Exercise `json:"exercise" gorm:"foreignKey:ExerciseID"`
 	UserID     uint     `json:"userId"`
 	Reps       []Rep    `json:"reps"`
+	Date       *time.Time `json:"date,omitempty"`
 }

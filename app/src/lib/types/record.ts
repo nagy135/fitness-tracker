@@ -17,6 +17,7 @@ export interface Record {
   exercise: Exercise;
   userId: number;
   reps: Rep[];
+  date?: string;
 }
 
 export interface RecordsResponse {
@@ -32,6 +33,7 @@ export interface CreateRepRequest {
 export interface CreateRecordRequest {
   exerciseId: number;
   reps: CreateRepRequest[];
+  date?: string;
 }
 
 export interface ExerciseOption {

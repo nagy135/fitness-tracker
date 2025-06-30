@@ -16,6 +16,11 @@ export interface ExerciseStatistics {
 }
 
 export function processRecordsForStatistics(records: WorkoutRecord[]): ExerciseStatistics[] {
+  // Helper function to get the display date for a record
+  const getRecordDate = (record: WorkoutRecord): string => {
+    return record.date || record.createdAt;
+  };
+
   // Group records by exercise
   const exerciseGroups = records.reduce<Record<number, WorkoutRecord[]>>((acc, record) => {
     const key = record.exerciseId;
@@ -27,16 +32,17 @@ export function processRecordsForStatistics(records: WorkoutRecord[]): ExerciseS
   }, {});
 
   return Object.entries(exerciseGroups).map(([exerciseId, exerciseRecords]) => {
-    // Sort records by date
+    // Sort records by date (using custom date if available, otherwise createdAt)
     const sortedRecords = exerciseRecords.sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      (a, b) => new Date(getRecordDate(a)).getTime() - new Date(getRecordDate(b)).getTime()
     );
 
     // Calculate total weight per date
     const progressMap = new Map<string, { totalWeight: number; recordCount: number }>();
 
     sortedRecords.forEach(record => {
-      const date = new Date(record.createdAt).toISOString().split('T')[0]; // YYYY-MM-DD format
+      const recordDate = getRecordDate(record);
+      const date = new Date(recordDate).toISOString().split('T')[0]; // YYYY-MM-DD format
       const totalWeight = record.reps.reduce((sum, rep) => sum + rep.weight, 0);
       
       if (progressMap.has(date)) {
@@ -67,8 +73,8 @@ export function processRecordsForStatistics(records: WorkoutRecord[]): ExerciseS
       exerciseName: sortedRecords[0].exercise.name,
       progress,
       totalRecords: exerciseRecords.length,
-      firstRecordDate: sortedRecords[0].createdAt,
-      lastRecordDate: sortedRecords[sortedRecords.length - 1].createdAt,
+      firstRecordDate: getRecordDate(sortedRecords[0]),
+      lastRecordDate: getRecordDate(sortedRecords[sortedRecords.length - 1]),
     };
   }).sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
 }

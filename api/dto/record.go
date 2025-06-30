@@ -8,4 +8,5 @@ type RepDto struct {
 type RecordDto struct {
 	ExerciseID uint     `json:"exerciseId" validate:"required,min=1"`
 	Reps       []RepDto `json:"reps" validate:"required,min=1,dive"`
+	Date       *string  `json:"date,omitempty"`
 } 

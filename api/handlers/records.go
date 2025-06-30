@@ -7,6 +7,7 @@ import (
 	"github.com/nagy135/fitness-tracker/internal/auth"
 	"github.com/nagy135/fitness-tracker/models"
 	"github.com/nagy135/fitness-tracker/utils"
+	"time"
 )
 
 type RecordHandler struct {
@@ -69,6 +70,13 @@ func (h *RecordHandler) CreateRecord(c *fiber.Ctx) error {
 	record := models.Record{
 		ExerciseID: recordDto.ExerciseID,
 		UserID:     userID,
+	}
+
+	// Set custom date if provided
+	if recordDto.Date != nil && *recordDto.Date != "" {
+		if parsedDate, err := time.Parse("2006-01-02", *recordDto.Date); err == nil {
+			record.Date = &parsedDate
+		}
 	}
 
 	if err := tx.Create(&record).Error; err != nil {
