@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: "https://fit-api.infiniter.tech",
+  BASE_URL: "http://localhost:8080",
   ENDPOINTS: {
     EXERCISES: "/exercises",
     EXERCISE_OPTIONS: "/exercises/options",
@@ -10,4 +10,3 @@ export const API_CONFIG = {
     ASYNC_JOBS: "/async-jobs",
   },
 } as const;
-

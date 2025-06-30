@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -46,6 +46,115 @@ type RecordFormData = z.infer<typeof recordSchema>;
 
 interface RecordFormProps {
   onSuccess: () => void;
+}
+
+// Searchable Exercise Selector Component
+interface Exercise {
+  id: number;
+  name: string;
+}
+
+interface SearchableExerciseSelectorProps {
+  exercises: Exercise[];
+  value?: number;
+  onChange: (exerciseId: number | undefined) => void;
+  disabled?: boolean;
+  placeholder?: string;
+}
+
+function SearchableExerciseSelector({ 
+  exercises, 
+  value, 
+  onChange, 
+  disabled = false,
+  placeholder = "Search and select an exercise..." 
+}: SearchableExerciseSelectorProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+
+  // Update selected exercise when value prop changes
+  React.useEffect(() => {
+    const exercise = value ? exercises.find(ex => ex.id === value) || null : null;
+    setSelectedExercise(exercise);
+    setSearchTerm(exercise ? exercise.name : "");
+  }, [value, exercises]);
+
+  const filteredExercises = exercises.filter(exercise =>
+    exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleSelectExercise = (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+    setSearchTerm(exercise.name);
+    setIsOpen(false);
+    onChange(exercise.id);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    setIsOpen(true);
+    
+    // If the input is cleared, reset the selection
+    if (term === "") {
+      setSelectedExercise(null);
+      onChange(undefined);
+    }
+  };
+
+  const handleInputFocus = () => {
+    setIsOpen(true);
+  };
+
+  const handleInputBlur = () => {
+    // Delay closing to allow for option selection
+    setTimeout(() => setIsOpen(false), 200);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <Input
+        type="text"
+        value={searchTerm}
+        onChange={handleInputChange}
+        onFocus={handleInputFocus}
+        onBlur={handleInputBlur}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        disabled={disabled}
+        className="w-full"
+      />
+      
+      {isOpen && filteredExercises.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
+          {filteredExercises.map((exercise) => (
+            <div
+              key={exercise.id}
+              className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm border-b border-border last:border-b-0"
+              onMouseDown={() => handleSelectExercise(exercise)}
+            >
+              {exercise.name}
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {isOpen && filteredExercises.length === 0 && searchTerm && (
+        <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg">
+          <div className="px-3 py-2 text-sm text-muted-foreground">
+            No exercises found matching "{searchTerm}"
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function RecordForm({ onSuccess }: RecordFormProps) {
@@ -134,23 +243,13 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                 <FormItem>
                   <FormLabel>Exercise</FormLabel>
                   <FormControl>
-                    <Select
-                      placeholder="Select an exercise"
-                      {...field}
-                      value={field.value?.toString() || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value === "" ? undefined : parseInt(value));
-                      }}
+                    <SearchableExerciseSelector
+                      exercises={exerciseOptions?.exercises || []}
+                      value={field.value}
+                      onChange={field.onChange}
                       disabled={exercisesLoading}
-                    >
-                      <option value="">Select an exercise</option>
-                      {exerciseOptions?.exercises.map((exercise) => (
-                        <option key={exercise.id} value={exercise.id}>
-                          {exercise.name}
-                        </option>
-                      ))}
-                    </Select>
+                      placeholder={exercisesLoading ? "Loading exercises..." : "Search and select an exercise..."}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
