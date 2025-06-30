@@ -19,11 +19,11 @@ export default function Home() {
 
   if (isAuthenticated) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
         <div className="w-full max-w-md mx-auto space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2">Fitness Tracker</h1>
-            <p className="text-gray-600 mb-8">Welcome back!</p>
+            <h1 className="text-2xl font-bold mb-2 sm:text-3xl">Fitness Tracker</h1>
+            <p className="text-gray-600 mb-8 text-sm sm:text-base">Welcome back!</p>
           </div>
 
           <div className="space-y-4">
@@ -59,11 +59,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Fitness Tracker</h1>
-          <p className="text-gray-600">Please log in to continue</p>
+          <h1 className="text-2xl font-bold mb-2 sm:text-3xl">Fitness Tracker</h1>
+          <p className="text-gray-600 text-sm sm:text-base">Please log in to continue</p>
         </div>
         <LoginForm onSuccess={() => window.location.reload()} />
       </div>

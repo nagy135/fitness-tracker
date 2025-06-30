@@ -30,30 +30,35 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Statistics</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-2xl font-bold sm:text-3xl">Statistics</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base sm:mt-2">
               Analyze your workout performance and progress
             </p>
           </div>
-          <Button onClick={() => router.push("/")} variant="outline">
+          <Button 
+            onClick={() => router.push("/")} 
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto"
+          >
             Back to Home
           </Button>
         </div>
 
         <Tabs defaultValue="progress" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 max-w-md">
-            <TabsTrigger value="progress">Progress</TabsTrigger>
-            <TabsTrigger value="volume" disabled>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-none sm:max-w-md">
+            <TabsTrigger value="progress" className="text-xs sm:text-sm">Progress</TabsTrigger>
+            <TabsTrigger value="volume" disabled className="text-xs sm:text-sm">
               Volume
             </TabsTrigger>
-            <TabsTrigger value="strength" disabled>
+            <TabsTrigger value="strength" disabled className="text-xs sm:text-sm">
               Strength
             </TabsTrigger>
-            <TabsTrigger value="trends" disabled>
+            <TabsTrigger value="trends" disabled className="text-xs sm:text-sm">
               Trends
             </TabsTrigger>
           </TabsList>

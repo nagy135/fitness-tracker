@@ -40,26 +40,30 @@ export default function ExerciseDetailPage({ params }: ExerciseDetailPageProps) 
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Exercise Details</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-2xl font-bold sm:text-3xl">Exercise Details</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base sm:mt-2">
               {exercise ? `Viewing exercise: ${exercise.name}` : `Loading exercise ${resolvedParams.id}...`}
             </p>
           </div>
-          <div className="space-x-4">
+          <div className="flex gap-2 sm:gap-4">
             <Button 
               onClick={() => refetch()}
               variant="outline"
               disabled={isLoading}
+              size="sm"
+              className="flex-1 sm:flex-none"
             >
               {isLoading ? 'Refreshing...' : 'Refresh'}
             </Button>
             <Button 
               onClick={() => router.push('/exercises')}
               variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none"
             >
               Back to Exercises
             </Button>

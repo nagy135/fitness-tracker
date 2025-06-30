@@ -103,32 +103,39 @@ export default function RecordsPage() {
   };
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Records</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-2xl font-bold sm:text-3xl">Records</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base sm:mt-2">
               {data
                 ? `${data.count} record${data.count !== 1 ? "s" : ""} found`
                 : "Loading records..."}
             </p>
           </div>
-          <div className="space-x-4">
+          <div className="flex gap-2 sm:gap-4">
             <Button
               onClick={() => refetch()}
               variant="outline"
               disabled={isLoading}
+              size="sm"
+              className="flex-1 sm:flex-none"
             >
               {isLoading ? "Refreshing..." : "Refresh"}
             </Button>
-            <Button onClick={() => router.push("/")} variant="outline">
+            <Button 
+              onClick={() => router.push("/")} 
+              variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none"
+            >
               Back to Home
             </Button>
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
           {/* Form Section */}
           <div className="lg:col-span-1">
             <RecordForm onSuccess={handleRecordCreated} />

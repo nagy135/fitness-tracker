@@ -93,7 +93,7 @@ export function ProgressPerExercise() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
             <label htmlFor="exercise-select" className="text-sm font-medium">
               Select Exercise:
             </label>
@@ -101,6 +101,7 @@ export function ProgressPerExercise() {
               id="exercise-select"
               value={currentExerciseId.toString()}
               onChange={(e) => setSelectedExerciseId(parseInt(e.target.value))}
+              className="flex-1 sm:flex-none"
             >
               {exerciseStatistics.map((exerciseStats) => (
                 <option key={exerciseStats.exerciseId} value={exerciseStats.exerciseId}>
