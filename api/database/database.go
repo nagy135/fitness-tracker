@@ -53,6 +53,7 @@ func runMigrations(db *gorm.DB) error {
 		&models.Record{},
 		&models.Set{},
 		&models.AsyncJob{},
+		&models.Workout{},
 	}
 
 	for _, model := range models {

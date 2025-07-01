@@ -26,7 +26,7 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.JWT.Secret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid or expired JWT",
+				"error":   "Invalid or expired JWT",
 				"details": err.Error(),
 			})
 		},
@@ -45,4 +45,9 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 	asyncJobHandler := handlers.NewAsyncJobHandler(db)
 	app.Get("/async-jobs", asyncJobHandler.GetAsyncJobs)
 	app.Post("/async-jobs", asyncJobHandler.CreateAsyncJob)
+
+	workoutHandler := handlers.NewWorkoutHandler(db)
+	app.Get("/workouts", workoutHandler.GetWorkouts)
+	app.Get("/workouts/stats", workoutHandler.GetWorkoutStats)
+	app.Post("/workouts", workoutHandler.CreateWorkout)
 }

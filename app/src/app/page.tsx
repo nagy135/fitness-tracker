@@ -42,6 +42,13 @@ export default function Home() {
               Records
             </Button>
             <Button
+              onClick={() => router.push("/workouts")}
+              className="w-full"
+              size="lg"
+            >
+              Workouts
+            </Button>
+            <Button
               onClick={() => router.push("/statistics")}
               className="w-full"
               size="lg"

@@ -8,5 +8,7 @@ export const API_CONFIG = {
     RECORDS: "/records",
     USERS: "/users",
     ASYNC_JOBS: "/async-jobs",
+    WORKOUTS: "/workouts",
+    WORKOUT_STATS: "/workouts/stats",
   },
 } as const;
