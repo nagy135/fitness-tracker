@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useExercisesQuery } from "@/lib/queries/useExercisesQuery";
 import { formatDate } from "@/lib/utils/date";
 
-export default function ExercisesPage() {
+function ExercisesContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { data, isLoading, error, refetch } = useExercisesQuery();
   const router = useRouter();
@@ -230,5 +230,25 @@ export default function ExercisesPage() {
           )}
       </div>
     </div>
+  );
+}
+
+function ExercisesLoadingFallback() {
+  return (
+    <div className="min-h-screen p-4 sm:p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-lg text-gray-600">Loading exercises...</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ExercisesPage() {
+  return (
+    <Suspense fallback={<ExercisesLoadingFallback />}>
+      <ExercisesContent />
+    </Suspense>
   );
 }
