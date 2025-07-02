@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -18,6 +19,35 @@ export default function ExercisesPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { data, isLoading, error, refetch } = useExercisesQuery();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Get search term from URL or default to empty string
+  const initialSearchTerm = searchParams.get('search') || '';
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+
+  // Filter exercises based on search term
+  const filteredExercises = useMemo(() => {
+    if (!data?.exercises) return [];
+    
+    if (!searchTerm.trim()) {
+      return data.exercises;
+    }
+    
+    return data.exercises.filter(exercise =>
+      exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [data?.exercises, searchTerm]);
+
+  // Update URL when search term changes
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchTerm.trim()) {
+      params.set('search', searchTerm);
+    }
+    
+    const newUrl = params.toString() ? `?${params.toString()}` : '';
+    router.replace(`/exercises${newUrl}`, { scroll: false });
+  }, [searchTerm, router]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -37,6 +67,14 @@ export default function ExercisesPage() {
     return null; // Will redirect in useEffect
   }
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
   return (
     <div className="min-h-screen p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
@@ -45,7 +83,7 @@ export default function ExercisesPage() {
             <h1 className="text-2xl font-bold sm:text-3xl">Exercises</h1>
             <p className="text-gray-600 mt-1 text-sm sm:text-base sm:mt-2">
               {data
-                ? `${data.count} exercise${data.count !== 1 ? "s" : ""} found`
+                ? `${filteredExercises.length} of ${data.count} exercise${filteredExercises.length !== 1 ? "s" : ""} ${searchTerm.trim() ? 'matching your search' : 'found'}`
                 : "Loading exercises..."}
             </p>
           </div>
@@ -69,6 +107,39 @@ export default function ExercisesPage() {
             </Button>
           </div>
         </div>
+
+        {/* Search Filter */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Filter Exercises</CardTitle>
+            <CardDescription>Search exercises by name</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Search exercises..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="flex-1"
+              />
+              {searchTerm && (
+                <Button
+                  onClick={clearSearch}
+                  variant="outline"
+                  size="sm"
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+            {searchTerm && (
+              <p className="text-sm text-gray-600 mt-2">
+                Showing {filteredExercises.length} exercise{filteredExercises.length !== 1 ? 's' : ''} matching "{searchTerm}"
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {error && (
           <Card className="mb-6 border-red-200 bg-red-50">
@@ -95,9 +166,9 @@ export default function ExercisesPage() {
           </div>
         )}
 
-        {data && data.exercises && data.exercises.length > 0 && (
+        {data && filteredExercises.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {data.exercises.map((exercise) => (
+            {filteredExercises.map((exercise) => (
               <Card
                 key={exercise.id}
                 className="hover:shadow-md transition-shadow"
@@ -127,7 +198,26 @@ export default function ExercisesPage() {
           </div>
         )}
 
-        {data && data.exercises && data.exercises.length === 0 && (
+        {data && filteredExercises.length === 0 && searchTerm && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center text-gray-600">
+                <h3 className="font-semibold mb-2">No exercises found</h3>
+                <p>No exercises match your search "{searchTerm}"</p>
+                <Button
+                  onClick={clearSearch}
+                  variant="outline"
+                  size="sm"
+                  className="mt-4"
+                >
+                  Clear Search
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {data && data.exercises && data.exercises.length === 0 && !searchTerm && (
           <Card>
             <CardContent className="pt-6">
               <div className="text-center text-gray-600">
