@@ -20,21 +20,21 @@ export default function ExercisesPage() {
   const { data, isLoading, error, refetch } = useExercisesQuery();
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Get search term from URL or default to empty string
-  const initialSearchTerm = searchParams.get('search') || '';
+  const initialSearchTerm = searchParams.get("search") || "";
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
 
   // Filter exercises based on search term
   const filteredExercises = useMemo(() => {
     if (!data?.exercises) return [];
-    
+
     if (!searchTerm.trim()) {
       return data.exercises;
     }
-    
-    return data.exercises.filter(exercise =>
-      exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
+
+    return data.exercises.filter((exercise) =>
+      exercise.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [data?.exercises, searchTerm]);
 
@@ -42,10 +42,10 @@ export default function ExercisesPage() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (searchTerm.trim()) {
-      params.set('search', searchTerm);
+      params.set("search", searchTerm);
     }
-    
-    const newUrl = params.toString() ? `?${params.toString()}` : '';
+
+    const newUrl = params.toString() ? `?${params.toString()}` : "";
     router.replace(`/exercises${newUrl}`, { scroll: false });
   }, [searchTerm, router]);
 
@@ -72,7 +72,7 @@ export default function ExercisesPage() {
   };
 
   const clearSearch = () => {
-    setSearchTerm('');
+    setSearchTerm("");
   };
 
   return (
@@ -83,7 +83,7 @@ export default function ExercisesPage() {
             <h1 className="text-2xl font-bold sm:text-3xl">Exercises</h1>
             <p className="text-gray-600 mt-1 text-sm sm:text-base sm:mt-2">
               {data
-                ? `${filteredExercises.length} of ${data.count} exercise${filteredExercises.length !== 1 ? "s" : ""} ${searchTerm.trim() ? 'matching your search' : 'found'}`
+                ? `${filteredExercises.length} of ${data.count} exercise${filteredExercises.length !== 1 ? "s" : ""} ${searchTerm.trim() ? "matching your search" : "found"}`
                 : "Loading exercises..."}
             </p>
           </div>
@@ -124,18 +124,16 @@ export default function ExercisesPage() {
                 className="flex-1"
               />
               {searchTerm && (
-                <Button
-                  onClick={clearSearch}
-                  variant="outline"
-                  size="sm"
-                >
+                <Button onClick={clearSearch} variant="outline" size="sm">
                   Clear
                 </Button>
               )}
             </div>
             {searchTerm && (
               <p className="text-sm text-gray-600 mt-2">
-                Showing {filteredExercises.length} exercise{filteredExercises.length !== 1 ? 's' : ''} matching "{searchTerm}"
+                Showing {filteredExercises.length} exercise
+                {filteredExercises.length !== 1 ? "s" : ""} matching{" "}
+                {searchTerm}
               </p>
             )}
           </CardContent>
@@ -203,7 +201,7 @@ export default function ExercisesPage() {
             <CardContent className="pt-6">
               <div className="text-center text-gray-600">
                 <h3 className="font-semibold mb-2">No exercises found</h3>
-                <p>No exercises match your search "{searchTerm}"</p>
+                <p>No exercises match your search {searchTerm}</p>
                 <Button
                   onClick={clearSearch}
                   variant="outline"
@@ -217,16 +215,19 @@ export default function ExercisesPage() {
           </Card>
         )}
 
-        {data && data.exercises && data.exercises.length === 0 && !searchTerm && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center text-gray-600">
-                <h3 className="font-semibold mb-2">No exercises found</h3>
-                <p>Start by creating your first exercise!</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {data &&
+          data.exercises &&
+          data.exercises.length === 0 &&
+          !searchTerm && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center text-gray-600">
+                  <h3 className="font-semibold mb-2">No exercises found</h3>
+                  <p>Start by creating your first exercise!</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
       </div>
     </div>
   );
