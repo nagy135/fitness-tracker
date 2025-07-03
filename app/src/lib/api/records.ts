@@ -1,6 +1,6 @@
 import { AuthService } from '@/lib/auth';
 import { API_CONFIG } from '@/lib/config/api';
-import { RecordsResponse, CreateRecordRequest, Record, ExerciseOptionsResponse } from '@/lib/types/record';
+import { RecordsResponse, CreateRecordRequest, UpdateRecordRequest, Record, ExerciseOptionsResponse } from '@/lib/types/record';
 
 export class RecordsAPI {
   private static async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -30,6 +30,13 @@ export class RecordsAPI {
   static async createRecord(record: CreateRecordRequest): Promise<Record> {
     return this.makeRequest<Record>(API_CONFIG.ENDPOINTS.RECORDS, {
       method: 'POST',
+      body: JSON.stringify(record),
+    });
+  }
+
+  static async updateRecord(id: number, record: UpdateRecordRequest): Promise<Record> {
+    return this.makeRequest<Record>(API_CONFIG.ENDPOINTS.RECORD_BY_ID(id), {
+      method: 'PUT',
       body: JSON.stringify(record),
     });
   }

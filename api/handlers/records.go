@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/nagy135/fitness-tracker/database"
 	"github.com/nagy135/fitness-tracker/dto"
 	"github.com/nagy135/fitness-tracker/internal/auth"
 	"github.com/nagy135/fitness-tracker/models"
 	"github.com/nagy135/fitness-tracker/utils"
-	"time"
 )
 
 type RecordHandler struct {
@@ -112,4 +113,101 @@ func (h *RecordHandler) CreateRecord(c *fiber.Ctx) error {
 	h.db.DB.Preload("Exercise").Preload("Sets").First(&completeRecord, record.ID)
 
 	return c.Status(fiber.StatusCreated).JSON(completeRecord)
+}
+
+func (h *RecordHandler) UpdateRecord(c *fiber.Ctx) error {
+	userID, err := auth.GetUserIDFromToken(c)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// Get record ID from URL params
+	recordID := c.Params("id")
+	if recordID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Record ID is required",
+		})
+	}
+
+	var updateRecordDto dto.UpdateRecordDto
+	if err := c.BodyParser(&updateRecordDto); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cannot parse JSON",
+		})
+	}
+
+	if errors := utils.ValidateStruct(updateRecordDto); len(errors) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Validation failed",
+			"details": errors,
+		})
+	}
+
+	// Check if record exists and belongs to the user
+	var existingRecord models.Record
+	result := h.db.DB.Where("id = ? AND user_id = ?", recordID, userID).First(&existingRecord)
+	if result.Error != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Record not found or doesn't belong to you",
+		})
+	}
+
+	// Start a transaction
+	tx := h.db.DB.Begin()
+
+	// Delete existing sets
+	if err := tx.Where("record_id = ?", recordID).Delete(&models.Set{}).Error; err != nil {
+		tx.Rollback()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to delete existing sets",
+		})
+	}
+
+	// Update the record
+	existingRecord.ExerciseID = updateRecordDto.ExerciseID
+
+	// Set custom date if provided
+	if updateRecordDto.Date != nil && *updateRecordDto.Date != "" {
+		if parsedDate, err := time.Parse("2006-01-02", *updateRecordDto.Date); err == nil {
+			existingRecord.Date = &parsedDate
+		}
+	} else {
+		existingRecord.Date = nil
+	}
+
+	if err := tx.Save(&existingRecord).Error; err != nil {
+		tx.Rollback()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update record",
+		})
+	}
+
+	// Create the new sets
+	var sets []models.Set
+	for _, setDto := range updateRecordDto.Sets {
+		set := models.Set{
+			Reps:     setDto.Reps,
+			Weight:   setDto.Weight,
+			RecordID: existingRecord.ID,
+		}
+		sets = append(sets, set)
+	}
+
+	if err := tx.Create(&sets).Error; err != nil {
+		tx.Rollback()
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create new sets",
+		})
+	}
+
+	// Commit the transaction
+	tx.Commit()
+
+	// Load the complete record with relationships
+	var completeRecord models.Record
+	h.db.DB.Preload("Exercise").Preload("Sets").First(&completeRecord, existingRecord.ID)
+
+	return c.JSON(completeRecord)
 }

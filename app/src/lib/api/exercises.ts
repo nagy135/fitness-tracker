@@ -1,15 +1,16 @@
 import { AuthService } from '@/lib/auth';
 import { API_CONFIG } from '@/lib/config/api';
-import { Exercise, ExercisesResponse } from '@/lib/types/exercise';
+import { Exercise, ExercisesResponse, CreateExerciseRequest } from '@/lib/types/exercise';
 
 export class ExercisesAPI {
-  private static async makeRequest<T>(endpoint: string): Promise<T> {
+  private static async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         ...AuthService.getAuthHeaders(),
       },
+      ...options,
     });
 
     if (!response.ok) {
@@ -28,5 +29,16 @@ export class ExercisesAPI {
 
   static async getExerciseById(id: string | number): Promise<Exercise> {
     return this.makeRequest<Exercise>(API_CONFIG.ENDPOINTS.EXERCISE_BY_ID(id));
+  }
+
+  static async createExercise(exercise: CreateExerciseRequest): Promise<Exercise> {
+    return this.makeRequest<Exercise>(API_CONFIG.ENDPOINTS.EXERCISES, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...AuthService.getAuthHeaders(),
+      },
+      body: JSON.stringify(exercise),
+    });
   }
 } 

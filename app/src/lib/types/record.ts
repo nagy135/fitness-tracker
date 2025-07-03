@@ -36,6 +36,12 @@ export interface CreateRecordRequest {
   date?: string;
 }
 
+export interface UpdateRecordRequest {
+  exerciseId: number;
+  sets: CreateSetRequest[];
+  date?: string;
+}
+
 export interface ExerciseOption {
   id: number;
   name: string;

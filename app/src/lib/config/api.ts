@@ -6,6 +6,7 @@ export const API_CONFIG = {
     EXERCISE_BY_ID: (id: string | number) => `/exercises/${id}`,
     LOGIN: "/login",
     RECORDS: "/records",
+    RECORD_BY_ID: (id: string | number) => `/records/${id}`,
     USERS: "/users",
     ASYNC_JOBS: "/async-jobs",
     WORKOUTS: "/workouts",

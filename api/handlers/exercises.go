@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/nagy135/fitness-tracker/database"
 	"github.com/nagy135/fitness-tracker/dto"
@@ -99,22 +101,44 @@ func (h *ExerciseHandler) GetExerciseOptions(c *fiber.Ctx) error {
 }
 
 func (h *ExerciseHandler) CreateExercise(c *fiber.Ctx) error {
-	var exerciseDto dto.ExerciseDto
-	if err := c.BodyParser(&exerciseDto); err != nil {
+	var createExerciseDto dto.CreateExerciseDto
+	if err := c.BodyParser(&createExerciseDto); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
 	}
 
-	if errors := utils.ValidateStruct(exerciseDto); len(errors) > 0 {
+	if errors := utils.ValidateStruct(createExerciseDto); len(errors) > 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "Validation failed",
 			"details": errors,
 		})
 	}
 
+	// Convert arrays to JSON strings for database storage
+	primaryMusclesJSON, err := json.Marshal(createExerciseDto.PrimaryMuscles)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to process primary muscles",
+		})
+	}
+	primaryMusclesStr := string(primaryMusclesJSON)
+
+	// Convert single instruction string to array for consistency
+	instructionsArray := []string{createExerciseDto.Instructions}
+	instructionsJSON, err := json.Marshal(instructionsArray)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to process instructions",
+		})
+	}
+	instructionsStr := string(instructionsJSON)
+
+	// Create exercise with the new fields
 	exercise := models.Exercise{
-		Name: exerciseDto.Name,
+		Name:             createExerciseDto.Name,
+		PrimaryMusclesDB: &primaryMusclesStr,
+		InstructionsDB:   &instructionsStr,
 	}
 
 	result := h.db.DB.Create(&exercise)
@@ -124,5 +148,10 @@ func (h *ExerciseHandler) CreateExercise(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(exercise)
+	// Load the complete exercise with the arrays populated
+	var completeExercise models.Exercise
+	h.db.DB.First(&completeExercise, exercise.ID)
+	h.transformImageURLs(&completeExercise)
+
+	return c.Status(fiber.StatusCreated).JSON(completeExercise)
 }

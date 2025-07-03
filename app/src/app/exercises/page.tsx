@@ -13,11 +13,14 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useExercisesQuery } from "@/lib/queries/useExercisesQuery";
+import { useCreateExerciseMutation } from "@/lib/queries/useCreateExerciseMutation";
+import { CreateExerciseForm } from "@/components/CreateExerciseForm";
 import { formatDate } from "@/lib/utils/date";
 
 function ExercisesContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { data, isLoading, error, refetch } = useExercisesQuery();
+  const { createExercise, isLoading: isCreating } = useCreateExerciseMutation();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -49,6 +52,18 @@ function ExercisesContent() {
     router.replace(`/exercises${newUrl}`, { scroll: false });
   }, [searchTerm, router]);
 
+  // Restore scroll position when returning from exercise detail
+  useEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem('exercisesScrollPosition');
+    if (savedScrollPosition && data && filteredExercises.length > 0) {
+      const scrollTop = parseInt(savedScrollPosition);
+      setTimeout(() => {
+        window.scrollTo(0, scrollTop);
+        sessionStorage.removeItem('exercisesScrollPosition');
+      }, 50);
+    }
+  }, [data, filteredExercises.length]);
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push("/");
@@ -75,6 +90,21 @@ function ExercisesContent() {
     setSearchTerm("");
   };
 
+  const handleCreateExercise = async (data: {
+    name: string;
+    primaryMuscles: string[];
+    instructions: string;
+  }) => {
+    await createExercise(data);
+    refetch(); // Refresh the exercises list
+  };
+
+  // Store scroll position before navigating to exercise detail
+  const handleExerciseClick = (exerciseId: number) => {
+    sessionStorage.setItem('exercisesScrollPosition', window.scrollY.toString());
+    router.push(`/exercises/${exerciseId}`);
+  };
+
   return (
     <div className="min-h-screen p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
@@ -88,6 +118,10 @@ function ExercisesContent() {
             </p>
           </div>
           <div className="flex gap-2 sm:gap-4">
+            <CreateExerciseForm
+              onSubmit={handleCreateExercise}
+              isLoading={isCreating}
+            />
             <Button
               onClick={() => refetch()}
               variant="outline"
@@ -182,7 +216,7 @@ function ExercisesContent() {
                   </div>
                   <div className="mt-4">
                     <Button
-                      onClick={() => router.push(`/exercises/${exercise.id}`)}
+                      onClick={() => handleExerciseClick(exercise.id)}
                       variant="outline"
                       size="sm"
                       className="w-full"

@@ -230,7 +230,7 @@ func (w *AsyncWorker) FetchExercises(asyncJobID uint) {
 	var totalImagesDownloaded int
 
 	// Limit to first 10 exercises for testing
-	const LIMIT_FOR_TESTING = false
+	const LIMIT_FOR_TESTING = true
 	maxExercises := len(externalExercises)
 	if LIMIT_FOR_TESTING {
 		maxExercises = min(len(externalExercises), 10)

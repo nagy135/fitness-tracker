@@ -13,10 +13,11 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useRecordsQuery } from "@/lib/queries/useRecordsQuery";
 import { RecordForm } from "@/components/RecordForm";
+import { EditRecordForm } from "@/components/EditRecordForm";
 import { formatDateTime } from "@/lib/utils/date";
 import { Record } from "@/lib/types/record";
 
-function RecordCard({ record }: { record: Record }) {
+function RecordCard({ record, onRecordUpdated }: { record: Record; onRecordUpdated: () => void }) {
   const totalVolume = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
   
   // Use custom date if available, otherwise use createdAt
@@ -28,8 +29,11 @@ function RecordCard({ record }: { record: Record }) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{record.exercise.name}</CardTitle>
-          <div className="text-sm text-gray-500">
-            {record.sets.length} set{record.sets.length !== 1 ? 's' : ''}
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-500">
+              {record.sets.length} set{record.sets.length !== 1 ? 's' : ''}
+            </div>
+            <EditRecordForm record={record} onSuccess={onRecordUpdated} />
           </div>
         </div>
         <CardDescription>
@@ -102,6 +106,10 @@ export default function RecordsPage() {
     refetch(); // Refresh the records list when a new record is created
   };
 
+  const handleRecordUpdated = () => {
+    refetch(); // Refresh the records list when a record is updated
+  };
+
   return (
     <div className="min-h-screen p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
@@ -115,6 +123,14 @@ export default function RecordsPage() {
             </p>
           </div>
           <div className="flex gap-2 sm:gap-4">
+            <Button
+              onClick={() => router.push("/exercises")}
+              variant="default"
+              size="sm"
+              className="flex-1 sm:flex-none"
+            >
+              View Exercises
+            </Button>
             <Button
               onClick={() => refetch()}
               variant="outline"
@@ -180,7 +196,7 @@ export default function RecordsPage() {
                       return dateB - dateA; // Sort by newest first
                     })
                     .map((record) => (
-                    <RecordCard key={record.id} record={record} />
+                    <RecordCard key={record.id} record={record} onRecordUpdated={handleRecordUpdated} />
                   ))}
                 </div>
               </div>
@@ -191,7 +207,14 @@ export default function RecordsPage() {
                 <CardContent className="pt-6">
                   <div className="text-center text-gray-600">
                     <h3 className="font-semibold mb-2">No records found</h3>
-                    <p>Start by creating your first record using the form on the left!</p>
+                    <p className="mb-4">Start by creating your first record using the form on the left!</p>
+                    <Button
+                      onClick={() => router.push("/exercises")}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Browse Exercises
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

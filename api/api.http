@@ -2,7 +2,7 @@
 
 # @name get-all-exercises
 
-GET http://localhost:8080/exercises HTTP/1.1
+GET https://fit-api.infiniter.tech/exercises HTTP/1.1
 Authorization: Bearer {{accessToken}}
 
 
@@ -10,7 +10,7 @@ Authorization: Bearer {{accessToken}}
 
 # @name get-exercise-options
 
-GET http://localhost:8080/exercises/options HTTP/1.1
+GET https://fit-api.infiniter.tech/exercises/options HTTP/1.1
 Authorization: Bearer {{accessToken}}
 
 
@@ -18,7 +18,7 @@ Authorization: Bearer {{accessToken}}
 
 # @name create-exercise
 
-POST http://localhost:8080/exercises HTTP/1.1
+POST https://fit-api.infiniter.tech/exercises HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -34,7 +34,7 @@ Authorization: Bearer {{accessToken}}
 
 # @name get-all-records
 
-GET http://localhost:8080/records HTTP/1.1
+GET https://fit-api.infiniter.tech/records HTTP/1.1
 Authorization: Bearer {{accessToken}}
 
 
@@ -42,7 +42,7 @@ Authorization: Bearer {{accessToken}}
 
 # @name create-record
 
-POST http://localhost:8080/records HTTP/1.1
+POST https://fit-api.infiniter.tech/records HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -50,16 +50,16 @@ Authorization: Bearer {{accessToken}}
   "exerciseId": 1,
   "reps": [
     {
-      "weight": 100,
-      "feeling": "easy"
+      "feeling": "easy",
+      "weight": 100
     },
     {
-      "weight": 105,
-      "feeling": "normal"
+      "feeling": "normal",
+      "weight": 105
     },
     {
-      "weight": 110,
-      "feeling": "hard"
+      "feeling": "hard",
+      "weight": 110
     }
   ]
 }
@@ -69,23 +69,23 @@ Authorization: Bearer {{accessToken}}
 
 # @name create-record-with-date
 
-POST http://localhost:8080/records HTTP/1.1
+POST https://fit-api.infiniter.tech/records HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
+  "date": "2024-01-15",
   "exerciseId": 1,
   "reps": [
     {
-      "weight": 100,
-      "feeling": "easy"
+      "feeling": "easy",
+      "weight": 100
     },
     {
-      "weight": 105,
-      "feeling": "normal"
+      "feeling": "normal",
+      "weight": 105
     }
-  ],
-  "date": "2024-01-15"
+  ]
 }
 
 
@@ -96,7 +96,7 @@ Authorization: Bearer {{accessToken}}
 
 # @name login
 
-POST http://localhost:8080/login HTTP/1.1
+POST https://fit-api.infiniter.tech/login HTTP/1.1
 Content-Type: application/json
 
 {
@@ -112,7 +112,7 @@ Content-Type: application/json
 
 # @name create-user
 
-POST http://localhost:8080/users HTTP/1.1
+POST https://fit-api.infiniter.tech/users HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -129,7 +129,7 @@ Authorization: Bearer {{accessToken}}
 
 # @name create-async-job-for-exercises
 
-POST http://localhost:8080/async-jobs HTTP/1.1
+POST https://fit-api.infiniter.tech/async-jobs HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -142,5 +142,51 @@ Authorization: Bearer {{accessToken}}
 
 # @name get-async-jobs
 
-GET http://localhost:8080/async-jobs HTTP/1.1
+GET https://fit-api.infiniter.tech/async-jobs HTTP/1.1
 Authorization: Bearer {{accessToken}}
+
+
+### ======================================== ###
+
+
+### 
+
+# @name get-all-workouts
+
+GET https://fit-api.infiniter.tech/workouts HTTP/1.1
+Authorization: Bearer {{accessToken}}
+
+
+### 
+
+# @name get-workout-stats
+
+GET https://fit-api.infiniter.tech/workouts/stats HTTP/1.1
+Authorization: Bearer {{accessToken}}
+
+
+### 
+
+# @name create-workout
+
+POST https://fit-api.infiniter.tech/workouts HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "label": "Push Day",
+  "date": "2024-12-15"
+}
+
+
+### 
+
+# @name create-workout-without-date
+
+POST https://fit-api.infiniter.tech/workouts HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "label": "Leg Day"
+}

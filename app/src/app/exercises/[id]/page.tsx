@@ -60,7 +60,7 @@ export default function ExerciseDetailPage({ params }: ExerciseDetailPageProps) 
               {isLoading ? 'Refreshing...' : 'Refresh'}
             </Button>
             <Button 
-              onClick={() => router.push('/exercises')}
+              onClick={() => router.back()}
               variant="outline"
               size="sm"
               className="flex-1 sm:flex-none"
@@ -85,7 +85,7 @@ export default function ExerciseDetailPage({ params }: ExerciseDetailPageProps) 
                     Try Again
                   </Button>
                   <Button 
-                    onClick={() => router.push('/exercises')}
+                    onClick={() => router.back()}
                     variant="outline"
                     size="sm"
                   >
@@ -125,35 +125,77 @@ export default function ExerciseDetailPage({ params }: ExerciseDetailPageProps) 
                   </div>
                   
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Additional Details</h3>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      {exercise.images && exercise.images.length > 0 ? (
-                        <div>
-                          <p className="font-medium">Images:</p>
-                          <div className="grid gap-2 mt-2">
-                            {exercise.images.map((image, index) => (
-                              <Image
-                                key={index}
-                                src={image} 
-                                alt={`${exercise.name} image ${index + 1}`}
-                                width={400}
-                                height={300}
-                                className="w-full max-w-sm rounded-lg border"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            ))}
-                          </div>
+                    <h3 className="text-lg font-semibold mb-2">Primary Muscles</h3>
+                    <div className="space-y-2 text-sm">
+                      {exercise.primaryMuscles && exercise.primaryMuscles.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {exercise.primaryMuscles.map((muscle, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {muscle}
+                            </span>
+                          ))}
                         </div>
                       ) : (
-                        <p>No images available</p>
+                        <p className="text-gray-500">No muscle groups specified</p>
                       )}
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Instructions Section */}
+            {exercise.instructions && exercise.instructions.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Instructions</CardTitle>
+                  <CardDescription>How to perform this exercise</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {exercise.instructions.map((instruction, index) => (
+                      <div key={index} className="flex gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                          {index + 1}
+                        </span>
+                        <p className="text-sm leading-relaxed">{instruction}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Images Section */}
+            {exercise.images && exercise.images.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Exercise Images</CardTitle>
+                  <CardDescription>Visual demonstration of the exercise</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {exercise.images.map((image, index) => (
+                      <div key={index} className="relative">
+                        <Image
+                          src={image} 
+                          alt={`${exercise.name} image ${index + 1}`}
+                          width={400}
+                          height={300}
+                          className="w-full rounded-lg border aspect-video object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Placeholder for future features */}
             <Card>
