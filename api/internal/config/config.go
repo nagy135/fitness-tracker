@@ -25,8 +25,9 @@ type JWTConfig struct {
 }
 
 type ServerConfig struct {
-	Port    string
-	BaseURL string
+	Port         string
+	BaseURL      string
+	AllowOrigins string
 }
 
 // LoadConfig loads configuration from environment variables
@@ -44,8 +45,8 @@ func LoadConfig() *Config {
 			Duration: time.Hour * 72,
 		},
 		Server: ServerConfig{
-			Port:    getEnv("SERVER_PORT", "8080"),
-			BaseURL: getEnv("SERVER_BASE_URL", "http://localhost:8080"),
+			Port:         getEnv("SERVER_PORT", "8080"),
+			BaseURL:      getEnv("SERVER_BASE_URL", "http://localhost:8080"),
 			AllowOrigins: getEnv("SERVER_ALLOW_ORIGINS", "http://localhost:3004"),
 		},
 	}
@@ -57,4 +58,3 @@ func getEnv(key, defaultValue string) string {
 	}
 	return defaultValue
 }
-
