@@ -46,6 +46,7 @@ func LoadConfig() *Config {
 		Server: ServerConfig{
 			Port:    getEnv("SERVER_PORT", "8080"),
 			BaseURL: getEnv("SERVER_BASE_URL", "http://localhost:8080"),
+			AllowOrigins: getEnv("SERVER_ALLOW_ORIGINS", "http://localhost:3004"),
 		},
 	}
 }
