@@ -100,39 +100,103 @@ func (h *WorkoutHandler) GetWorkoutStats(c *fiber.Ctx) error {
 		WorkoutName string  `json:"workoutName"`
 	}
 
-	var stats []WorkoutStats
-
-	// Get weight stats from actual exercise records, and include workout names where they exist
-	result := h.db.DB.Raw(`
-		WITH daily_weights AS (
-			SELECT 
-				DATE(COALESCE(r.date, r.created_at)) as date,
-				SUM(s.weight * s.reps) as total_weight
-			FROM records r
-			JOIN sets s ON s.record_id = r.id
-			WHERE r.user_id = ?
-			GROUP BY DATE(COALESCE(r.date, r.created_at))
-		),
-		daily_workouts AS (
-			SELECT 
-				DATE(COALESCE(w.date, w.created_at)) as date,
-				w.label as workout_name
-			FROM workouts w
-			WHERE w.user_id = ?
-		)
-		SELECT 
-			COALESCE(dw.date, wo.date) as date,
-			COALESCE(dw.total_weight, 0) as total_weight,
-			COALESCE(wo.workout_name, 'Workout') as workout_name
-		FROM daily_weights dw
-		FULL OUTER JOIN daily_workouts wo ON dw.date = wo.date
-		ORDER BY date DESC
-	`, userID, userID).Scan(&stats)
-
+	// Get all records with their sets for the user
+	var records []models.Record
+	result := h.db.DB.Preload("Sets").Where("user_id = ?", userID).Find(&records)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": result.Error.Error(),
 		})
+	}
+
+	// Get all workouts for the user
+	var workouts []models.Workout
+	result = h.db.DB.Where("user_id = ?", userID).Find(&workouts)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": result.Error.Error(),
+		})
+	}
+
+	// Calculate daily weights from records
+	dailyWeights := make(map[string]float32)
+	for _, record := range records {
+		// Use record date if available, otherwise use created_at
+		var date time.Time
+		if record.Date != nil {
+			date = *record.Date
+		} else {
+			date = record.CreatedAt
+		}
+
+		dateStr := date.Format("2006-01-02")
+
+		// Calculate total weight for this record (sum of all sets)
+		var recordWeight float32
+		for _, set := range record.Sets {
+			recordWeight += set.Weight * float32(set.Reps)
+		}
+
+		// Add to daily total
+		dailyWeights[dateStr] += recordWeight
+	}
+
+	// Create workout name lookup by date
+	workoutsByDate := make(map[string]string)
+	for _, workout := range workouts {
+		// Use workout date if available, otherwise use created_at
+		var date time.Time
+		if workout.Date != nil {
+			date = *workout.Date
+		} else {
+			date = workout.CreatedAt
+		}
+
+		dateStr := date.Format("2006-01-02")
+
+		// If multiple workouts on same day, concatenate names
+		if existing, exists := workoutsByDate[dateStr]; exists {
+			workoutsByDate[dateStr] = existing + " + " + workout.Label
+		} else {
+			workoutsByDate[dateStr] = workout.Label
+		}
+	}
+
+	// Combine data and create stats
+	var stats []WorkoutStats
+
+	// Get all unique dates from both maps
+	dateSet := make(map[string]bool)
+	for date := range dailyWeights {
+		dateSet[date] = true
+	}
+	for date := range workoutsByDate {
+		dateSet[date] = true
+	}
+
+	// Create stats for each date
+	for date := range dateSet {
+		stat := WorkoutStats{
+			Date:        date,
+			TotalWeight: dailyWeights[date], // defaults to 0 if not found
+			WorkoutName: workoutsByDate[date],
+		}
+
+		// If no workout name, use default
+		if stat.WorkoutName == "" {
+			stat.WorkoutName = "Workout"
+		}
+
+		stats = append(stats, stat)
+	}
+
+	// Sort by date descending
+	for i := 0; i < len(stats); i++ {
+		for j := i + 1; j < len(stats); j++ {
+			if stats[i].Date < stats[j].Date {
+				stats[i], stats[j] = stats[j], stats[i]
+			}
+		}
 	}
 
 	return c.JSON(fiber.Map{
