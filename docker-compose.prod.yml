@@ -3,15 +3,13 @@ version: '3.8'
 services:
   api :
    container_name: fitness-tracker
-   working_dir: /app
-   image: cosmtrek/air
+   build:
+     context: ./api
+     dockerfile: Dockerfile.prod
    env_file:
      - api/.env
-   volumes:
-     - ./api:/app
    ports:
      - 8080:8080
-   command: sh -c "air"
    
   frontend:
     container_name: fitness-tracker-frontend
