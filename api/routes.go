@@ -50,5 +50,6 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 	workoutHandler := handlers.NewWorkoutHandler(db)
 	app.Get("/workouts", workoutHandler.GetWorkouts)
 	app.Get("/workouts/stats", workoutHandler.GetWorkoutStats)
+	app.Get("/workouts/stats/:date", workoutHandler.GetWorkoutStatsByDate)
 	app.Post("/workouts", workoutHandler.CreateWorkout)
 }

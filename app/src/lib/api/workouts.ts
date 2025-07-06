@@ -1,6 +1,6 @@
 import { AuthService } from '@/lib/auth';
 import { API_CONFIG } from '@/lib/config/api';
-import { WorkoutsResponse, CreateWorkoutRequest, Workout, WorkoutStatsResponse } from '@/lib/types/workout';
+import { WorkoutsResponse, CreateWorkoutRequest, Workout, WorkoutStatsResponse, DayStats } from '@/lib/types/workout';
 
 export class WorkoutsAPI {
   private static async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -29,6 +29,10 @@ export class WorkoutsAPI {
 
   static async getWorkoutStats(): Promise<WorkoutStatsResponse> {
     return this.makeRequest<WorkoutStatsResponse>(API_CONFIG.ENDPOINTS.WORKOUT_STATS);
+  }
+
+  static async getWorkoutStatsByDate(date: string): Promise<DayStats> {
+    return this.makeRequest<DayStats>(API_CONFIG.ENDPOINTS.WORKOUT_STATS_BY_DATE(date));
   }
 
   static async createWorkout(workout: CreateWorkoutRequest): Promise<Workout> {

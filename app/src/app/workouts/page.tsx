@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { WorkoutsAPI } from "@/lib/api/workouts";
-import { Workout, WorkoutStats } from "@/lib/types/workout";
+import { Workout, WorkoutStats, DayStats } from "@/lib/types/workout";
 import {
   Card,
   CardContent,
@@ -32,6 +32,9 @@ export default function WorkoutsPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date(),
   );
+  const [selectedDateDetails, setSelectedDateDetails] =
+    useState<DayStats | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<WorkoutFormData>({
     label: "",
@@ -48,6 +51,9 @@ export default function WorkoutsPage() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchData();
+      if (selectedDate) {
+        fetchDateDetails(selectedDate);
+      }
     }
   }, [isAuthenticated]);
 
@@ -63,6 +69,20 @@ export default function WorkoutsPage() {
       console.error("Error fetching workouts:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDateDetails = async (date: Date) => {
+    setLoadingDetails(true);
+    try {
+      const dateStr = format(date, "yyyy-MM-dd");
+      const details = await WorkoutsAPI.getWorkoutStatsByDate(dateStr);
+      setSelectedDateDetails(details);
+    } catch (error) {
+      console.error("Error fetching date details:", error);
+      setSelectedDateDetails(null);
+    } finally {
+      setLoadingDetails(false);
     }
   };
 
@@ -108,6 +128,10 @@ export default function WorkoutsPage() {
     ? getWorkoutForDate(selectedDate)
     : null;
   const selectedDateStats = selectedDate ? getStatsForDate(selectedDate) : null;
+
+  const formatSets = (setDetails: { reps: number; weight: number }[]) => {
+    return setDetails.map((set) => `${set.reps}x${set.weight}kg`).join(", ");
+  };
 
   if (authLoading) {
     return (
@@ -165,7 +189,14 @@ export default function WorkoutsPage() {
                 <DayPicker
                   mode="single"
                   selected={selectedDate}
-                  onSelect={setSelectedDate}
+                  onSelect={(date) => {
+                    setSelectedDate(date);
+                    if (date) {
+                      fetchDateDetails(date);
+                    } else {
+                      setSelectedDateDetails(null);
+                    }
+                  }}
                   modifiers={{
                     workout: getWorkoutDays(),
                   }}
@@ -239,6 +270,49 @@ export default function WorkoutsPage() {
                         </div>
                       </div>
                     )}
+
+                    {/* Exercise Breakdown */}
+                    {loadingDetails ? (
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="text-sm text-blue-700">
+                          Loading exercise details...
+                        </div>
+                      </div>
+                    ) : selectedDateDetails &&
+                      selectedDateDetails.exerciseDetails.length > 0 ? (
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="text-sm text-blue-700 font-medium mb-3">
+                          Exercise Breakdown
+                        </div>
+                        <div className="space-y-2">
+                          {selectedDateDetails.exerciseDetails.map(
+                            (exercise, index) => (
+                              <div
+                                key={index}
+                                className="text-sm text-gray-700"
+                              >
+                                <span className="font-medium text-blue-800">
+                                  {exercise.exerciseName}:
+                                </span>{" "}
+                                <span className="font-semibold text-blue-900">
+                                  {Math.round(exercise.totalWeight)}kg
+                                </span>
+                                <span className="text-gray-600 ml-2">
+                                  ({formatSets(exercise.setDetails)})
+                                </span>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    ) : selectedDateDetails &&
+                      selectedDateDetails.exerciseDetails.length === 0 ? (
+                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="text-sm text-gray-600">
+                          No exercise records found for this date
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ) : selectedDate ? (
                   <Button

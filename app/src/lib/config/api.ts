@@ -11,5 +11,6 @@ export const API_CONFIG = {
     ASYNC_JOBS: "/async-jobs",
     WORKOUTS: "/workouts",
     WORKOUT_STATS: "/workouts/stats",
+    WORKOUT_STATS_BY_DATE: (date: string) => `/workouts/stats/${date}`,
   },
 } as const;

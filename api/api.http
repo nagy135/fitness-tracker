@@ -167,6 +167,22 @@ Authorization: Bearer {{accessToken}}
 
 ### 
 
+# @name get-workout-stats-by-date
+
+GET https://fit-api.infiniter.tech/workouts/stats/2024-12-15 HTTP/1.1
+Authorization: Bearer {{accessToken}}
+
+
+### 
+
+# @name get-workout-stats-by-date-today
+
+GET https://fit-api.infiniter.tech/workouts/stats/2024-12-30 HTTP/1.1
+Authorization: Bearer {{accessToken}}
+
+
+### 
+
 # @name create-workout
 
 POST https://fit-api.infiniter.tech/workouts HTTP/1.1

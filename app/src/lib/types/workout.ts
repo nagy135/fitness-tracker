@@ -27,4 +27,22 @@ export interface WorkoutStats {
 export interface WorkoutStatsResponse {
   stats: WorkoutStats[];
   count: number;
+}
+
+export interface SetDetail {
+  reps: number;
+  weight: number;
+}
+
+export interface ExerciseStats {
+  exerciseName: string;
+  totalWeight: number;
+  setDetails: SetDetail[];
+}
+
+export interface DayStats {
+  date: string;
+  totalWeight: number;
+  workoutName: string;
+  exerciseDetails: ExerciseStats[];
 } 
