@@ -19,7 +19,7 @@ COPY . .
 # Build the application
 # CGO_ENABLED=0 creates a static binary
 # -ldflags="-w -s" strips debug info to reduce size
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o main ./main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o main .
 
 # Final stage - minimal runtime image
 FROM alpine:latest
