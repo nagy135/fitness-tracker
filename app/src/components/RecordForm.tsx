@@ -24,6 +24,7 @@ import {
 import { useExerciseOptionsQuery } from "@/lib/queries/useExerciseOptionsQuery";
 import { RecordsAPI } from "@/lib/api/records";
 import { CreateRecordRequest } from "@/lib/types/record";
+import { PRDisplay } from "@/components/PRDisplay";
 
 const setSchema = z.object({
   reps: z
@@ -263,6 +264,9 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                 </FormItem>
               )}
             />
+
+            {/* PR Display */}
+            <PRDisplay exerciseId={form.watch("exerciseId")} />
 
             <div className="space-y-4">
               <div className="flex items-center space-x-2">

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -210,4 +211,109 @@ func (h *RecordHandler) UpdateRecord(c *fiber.Ctx) error {
 	h.db.DB.Preload("Exercise").Preload("Sets").First(&completeRecord, existingRecord.ID)
 
 	return c.JSON(completeRecord)
+}
+
+func (h *RecordHandler) GetExercisePR(c *fiber.Ctx) error {
+	userID, err := auth.GetUserIDFromToken(c)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// Get exercise ID from URL params
+	exerciseIDParam := c.Params("exerciseId")
+	if exerciseIDParam == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Exercise ID is required",
+		})
+	}
+
+	// Parse exercise ID
+	exerciseID := 0
+	if _, err := fmt.Sscanf(exerciseIDParam, "%d", &exerciseID); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid exercise ID",
+		})
+	}
+
+	type PRResponse struct {
+		MaxTotalWeight float32 `json:"maxTotalWeight"`
+		Date           string  `json:"date"`
+		RecordID       uint    `json:"recordId"`
+	}
+
+	// Get all records for this exercise and user
+	var records []models.Record
+	result := h.db.DB.Preload("Sets").Where("user_id = ? AND exercise_id = ?", userID, exerciseID).Find(&records)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": result.Error.Error(),
+		})
+	}
+
+	if len(records) == 0 {
+		return c.JSON(fiber.Map{
+			"pr": nil,
+		})
+	}
+
+	// Group records by date and calculate total weight per day
+	dailyTotals := make(map[string]struct {
+		totalWeight float32
+		recordID    uint
+	})
+
+	for _, record := range records {
+		// Use record date if available, otherwise use created_at
+		var recordDate time.Time
+		if record.Date != nil {
+			recordDate = *record.Date
+		} else {
+			recordDate = record.CreatedAt
+		}
+
+		dateKey := recordDate.Format("2006-01-02")
+
+		// Calculate total weight for this record
+		var recordTotalWeight float32
+		for _, set := range record.Sets {
+			recordTotalWeight += set.Weight * float32(set.Reps)
+		}
+
+		// Add to daily total
+		if existing, exists := dailyTotals[dateKey]; exists {
+			dailyTotals[dateKey] = struct {
+				totalWeight float32
+				recordID    uint
+			}{
+				totalWeight: existing.totalWeight + recordTotalWeight,
+				recordID:    record.ID, // Keep the latest record ID for this date
+			}
+		} else {
+			dailyTotals[dateKey] = struct {
+				totalWeight float32
+				recordID    uint
+			}{
+				totalWeight: recordTotalWeight,
+				recordID:    record.ID,
+			}
+		}
+	}
+
+	// Find the maximum total weight
+	var maxPR *PRResponse
+	for date, data := range dailyTotals {
+		if maxPR == nil || data.totalWeight > maxPR.MaxTotalWeight {
+			maxPR = &PRResponse{
+				MaxTotalWeight: data.totalWeight,
+				Date:           date,
+				RecordID:       data.recordID,
+			}
+		}
+	}
+
+	return c.JSON(fiber.Map{
+		"pr": maxPR,
+	})
 }

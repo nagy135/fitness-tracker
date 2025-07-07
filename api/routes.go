@@ -42,6 +42,7 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 	app.Get("/records", recordHandler.GetRecords)
 	app.Post("/records", recordHandler.CreateRecord)
 	app.Put("/records/:id", recordHandler.UpdateRecord)
+	app.Get("/records/pr/:exerciseId", recordHandler.GetExercisePR)
 
 	asyncJobHandler := handlers.NewAsyncJobHandler(db)
 	app.Get("/async-jobs", asyncJobHandler.GetAsyncJobs)

@@ -2,6 +2,14 @@ import { AuthService } from '@/lib/auth';
 import { API_CONFIG } from '@/lib/config/api';
 import { RecordsResponse, CreateRecordRequest, UpdateRecordRequest, Record, ExerciseOptionsResponse } from '@/lib/types/record';
 
+export interface ExercisePRResponse {
+  pr: {
+    maxTotalWeight: number;
+    date: string;
+    recordId: number;
+  } | null;
+}
+
 export class RecordsAPI {
   private static async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
@@ -43,5 +51,9 @@ export class RecordsAPI {
 
   static async getExerciseOptions(): Promise<ExerciseOptionsResponse> {
     return this.makeRequest<ExerciseOptionsResponse>(API_CONFIG.ENDPOINTS.EXERCISE_OPTIONS);
+  }
+
+  static async getExercisePR(exerciseId: number): Promise<ExercisePRResponse> {
+    return this.makeRequest<ExercisePRResponse>(API_CONFIG.ENDPOINTS.RECORD_PR(exerciseId));
   }
 } 
