@@ -20,7 +20,7 @@ import { useExerciseOptionsQuery } from "@/lib/queries/useExerciseOptionsQuery";
 import { useUpdateRecordMutation } from "@/lib/queries/useUpdateRecordMutation";
 import { Record, UpdateRecordRequest } from "@/lib/types/record";
 import { Edit2, Plus, Trash2 } from "lucide-react";
-import { PRDisplay } from "@/components/PRDisplay";
+import { PRComparisonDisplay } from "@/components/PRComparisonDisplay";
 
 const setSchema = z.object({
   reps: z
@@ -182,8 +182,11 @@ export function EditRecordForm({ record, onSuccess }: EditRecordFormProps) {
             )}
           </div>
 
-          {/* PR Display */}
-          <PRDisplay exerciseId={form.watch("exerciseId")} />
+          {/* PR Comparison Display */}
+          <PRComparisonDisplay 
+            exerciseId={form.watch("exerciseId")} 
+            currentSets={form.watch("sets")} 
+          />
 
           {/* Date */}
           <div className="space-y-2">
