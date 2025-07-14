@@ -47,12 +47,6 @@ const updateRecordSchema = z.object({
 
 type UpdateRecordFormData = z.infer<typeof updateRecordSchema>;
 
-interface EditRecordFormProps {
-  record: Record;
-  onSuccess: () => void;
-}
-
-// Simplified Exercise Selector
 interface Exercise {
   id: number;
   name: string;
@@ -63,9 +57,10 @@ interface ExerciseSelectorProps {
   value: number;
   onChange: (exerciseId: number) => void;
   disabled?: boolean;
+  exerciseRecordCounts?: Record<number, number>; // New prop for record counts
 }
 
-function ExerciseSelector({ exercises, value, onChange, disabled = false }: ExerciseSelectorProps) {
+function ExerciseSelector({ exercises, value, onChange, disabled = false, exerciseRecordCounts = {} }: ExerciseSelectorProps) {
   return (
     <select
       value={value}
@@ -74,16 +69,25 @@ function ExerciseSelector({ exercises, value, onChange, disabled = false }: Exer
       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
     >
       <option value="">Select an exercise</option>
-      {exercises.map((exercise) => (
-        <option key={exercise.id} value={exercise.id}>
-          {exercise.name}
-        </option>
-      ))}
+      {exercises.map((exercise) => {
+        const recordCount = exerciseRecordCounts[exercise.id] || 0;
+        return (
+          <option key={exercise.id} value={exercise.id}>
+            {exercise.name}{recordCount > 0 ? ` (${recordCount}x)` : ''}
+          </option>
+        );
+      })}
     </select>
   );
 }
 
-export function EditRecordForm({ record, onSuccess }: EditRecordFormProps) {
+interface EditRecordFormProps {
+  record: Record;
+  onSuccess: () => void;
+  exerciseRecordCounts?: Record<number, number>; // New prop for record counts
+}
+
+export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }: EditRecordFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { data: exerciseOptions, isLoading: exercisesLoading } = useExerciseOptionsQuery();
   const { updateRecord, isLoading: isUpdating } = useUpdateRecordMutation();
@@ -175,6 +179,7 @@ export function EditRecordForm({ record, onSuccess }: EditRecordFormProps) {
                 exercises={exerciseOptions?.exercises || []}
                 value={form.watch("exerciseId")}
                 onChange={(exerciseId) => form.setValue("exerciseId", exerciseId)}
+                exerciseRecordCounts={exerciseRecordCounts}
               />
             )}
             {form.formState.errors.exerciseId && (

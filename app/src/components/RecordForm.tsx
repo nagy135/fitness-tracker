@@ -51,10 +51,6 @@ const recordSchema = z.object({
 
 type RecordFormData = z.infer<typeof recordSchema>;
 
-interface RecordFormProps {
-  onSuccess: () => void;
-}
-
 // Searchable Exercise Selector Component
 interface Exercise {
   id: number;
@@ -67,6 +63,7 @@ interface SearchableExerciseSelectorProps {
   onChange: (exerciseId: number | undefined) => void;
   disabled?: boolean;
   placeholder?: string;
+  exerciseRecordCounts?: Record<number, number>; // New prop for record counts
 }
 
 function SearchableExerciseSelector({
@@ -75,6 +72,7 @@ function SearchableExerciseSelector({
   onChange,
   disabled = false,
   placeholder = "Search and select an exercise...",
+  exerciseRecordCounts = {},
 }: SearchableExerciseSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -139,15 +137,25 @@ function SearchableExerciseSelector({
 
       {isOpen && filteredExercises.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
-          {filteredExercises.map((exercise) => (
-            <div
-              key={exercise.id}
-              className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm border-b border-border last:border-b-0"
-              onMouseDown={() => handleSelectExercise(exercise)}
-            >
-              {exercise.name}
-            </div>
-          ))}
+          {filteredExercises.map((exercise) => {
+            const recordCount = exerciseRecordCounts[exercise.id] || 0;
+            return (
+              <div
+                key={exercise.id}
+                className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm border-b border-border last:border-b-0"
+                onMouseDown={() => handleSelectExercise(exercise)}
+              >
+                <div className="flex items-center justify-between">
+                  <span>{exercise.name}</span>
+                  {recordCount > 0 && (
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full ml-2">
+                      ({recordCount}x)
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -162,7 +170,12 @@ function SearchableExerciseSelector({
   );
 }
 
-export function RecordForm({ onSuccess }: RecordFormProps) {
+interface RecordFormProps {
+  onSuccess: () => void;
+  exerciseRecordCounts?: Record<number, number>; // New prop for record counts
+}
+
+export function RecordForm({ onSuccess, exerciseRecordCounts = {} }: RecordFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDateField, setShowDateField] = useState(false);
@@ -258,6 +271,7 @@ export function RecordForm({ onSuccess }: RecordFormProps) {
                           ? "Loading exercises..."
                           : "Search and select an exercise..."
                       }
+                      exerciseRecordCounts={exerciseRecordCounts}
                     />
                   </FormControl>
                   <FormMessage />

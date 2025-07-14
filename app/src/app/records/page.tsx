@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,11 @@ import { EditRecordForm } from "@/components/EditRecordForm";
 import { formatDateTime } from "@/lib/utils/date";
 import { Record } from "@/lib/types/record";
 
-function RecordCard({ record, onRecordUpdated }: { record: Record; onRecordUpdated: () => void }) {
+function RecordCard({ record, onRecordUpdated, exerciseRecordCounts }: { 
+  record: Record; 
+  onRecordUpdated: () => void; 
+  exerciseRecordCounts: { [exerciseId: number]: number };
+}) {
   const totalVolume = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
   
   // Use custom date if available, otherwise use createdAt
@@ -33,7 +37,7 @@ function RecordCard({ record, onRecordUpdated }: { record: Record; onRecordUpdat
             <div className="text-sm text-gray-500">
               {record.sets.length} set{record.sets.length !== 1 ? 's' : ''}
             </div>
-            <EditRecordForm record={record} onSuccess={onRecordUpdated} />
+            <EditRecordForm record={record} onSuccess={onRecordUpdated} exerciseRecordCounts={exerciseRecordCounts} />
           </div>
         </div>
         <CardDescription>
@@ -89,6 +93,17 @@ export default function RecordsPage() {
       router.push("/");
     }
   }, [isAuthenticated, authLoading, router]);
+
+  // Calculate exercise record counts
+  const exerciseRecordCounts = React.useMemo(() => {
+    if (!data?.records) return {};
+    
+    const counts: { [exerciseId: number]: number } = {};
+    data.records.forEach(record => {
+      counts[record.exerciseId] = (counts[record.exerciseId] || 0) + 1;
+    });
+    return counts;
+  }, [data?.records]);
 
   if (authLoading) {
     return (
@@ -154,7 +169,7 @@ export default function RecordsPage() {
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
           {/* Form Section */}
           <div className="lg:col-span-1">
-            <RecordForm onSuccess={handleRecordCreated} />
+            <RecordForm onSuccess={handleRecordCreated} exerciseRecordCounts={exerciseRecordCounts} />
           </div>
 
           {/* Records List Section */}
@@ -196,7 +211,7 @@ export default function RecordsPage() {
                       return dateB - dateA; // Sort by newest first
                     })
                     .map((record) => (
-                    <RecordCard key={record.id} record={record} onRecordUpdated={handleRecordUpdated} />
+                    <RecordCard key={record.id} record={record} onRecordUpdated={handleRecordUpdated} exerciseRecordCounts={exerciseRecordCounts} />
                   ))}
                 </div>
               </div>
