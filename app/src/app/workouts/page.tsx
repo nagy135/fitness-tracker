@@ -48,15 +48,6 @@ export default function WorkoutsPage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchData();
-      if (selectedDate) {
-        fetchDateDetails(selectedDate);
-      }
-    }
-  }, [isAuthenticated, selectedDate, fetchData, fetchDateDetails]);
-
   const fetchData = useCallback(async () => {
     try {
       const [workoutsResponse, statsResponse] = await Promise.all([
@@ -85,6 +76,15 @@ export default function WorkoutsPage() {
       setLoadingDetails(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchData();
+      if (selectedDate) {
+        fetchDateDetails(selectedDate);
+      }
+    }
+  }, [isAuthenticated, selectedDate, fetchData, fetchDateDetails]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
