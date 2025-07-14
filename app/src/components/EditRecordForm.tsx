@@ -57,7 +57,7 @@ interface ExerciseSelectorProps {
   value: number;
   onChange: (exerciseId: number) => void;
   disabled?: boolean;
-  exerciseRecordCounts?: Record<number, number>; // New prop for record counts
+  exerciseRecordCounts?: { [exerciseId: number]: number }; // New prop for record counts
 }
 
 function ExerciseSelector({ exercises, value, onChange, disabled = false, exerciseRecordCounts = {} }: ExerciseSelectorProps) {
@@ -84,7 +84,7 @@ function ExerciseSelector({ exercises, value, onChange, disabled = false, exerci
 interface EditRecordFormProps {
   record: Record;
   onSuccess: () => void;
-  exerciseRecordCounts?: Record<number, number>; // New prop for record counts
+  exerciseRecordCounts?: { [exerciseId: number]: number }; // New prop for record counts
 }
 
 export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }: EditRecordFormProps) {
@@ -93,7 +93,7 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
   const { updateRecord, isLoading: isUpdating } = useUpdateRecordMutation();
 
   // Prepare initial values from the record
-  const getInitialValues = (): UpdateRecordFormData => {
+  const getInitialValues = React.useCallback((): UpdateRecordFormData => {
     return {
       exerciseId: record.exerciseId,
       sets: record.sets.map(set => ({
@@ -102,7 +102,7 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
       })),
       date: record.date ? record.date.split('T')[0] : '',
     };
-  };
+  }, [record]);
 
   const form = useForm<UpdateRecordFormData>({
     resolver: zodResolver(updateRecordSchema),
@@ -154,7 +154,7 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
     if (isOpen) {
       form.reset(getInitialValues());
     }
-  }, [record, isOpen, form]);
+  }, [record, isOpen, form, getInitialValues]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

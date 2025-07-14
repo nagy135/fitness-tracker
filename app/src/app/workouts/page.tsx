@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { WorkoutsAPI } from "@/lib/api/workouts";
 import { Workout, WorkoutStats, DayStats } from "@/lib/types/workout";
@@ -55,9 +55,9 @@ export default function WorkoutsPage() {
         fetchDateDetails(selectedDate);
       }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, selectedDate, fetchData, fetchDateDetails]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [workoutsResponse, statsResponse] = await Promise.all([
         WorkoutsAPI.getAllWorkouts(),
@@ -70,9 +70,9 @@ export default function WorkoutsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchDateDetails = async (date: Date) => {
+  const fetchDateDetails = useCallback(async (date: Date) => {
     setLoadingDetails(true);
     try {
       const dateStr = format(date, "yyyy-MM-dd");
@@ -84,7 +84,7 @@ export default function WorkoutsPage() {
     } finally {
       setLoadingDetails(false);
     }
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
