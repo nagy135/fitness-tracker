@@ -61,6 +61,18 @@ interface ExerciseSelectorProps {
 }
 
 function ExerciseSelector({ exercises, value, onChange, disabled = false, exerciseRecordCounts = {} }: ExerciseSelectorProps) {
+  // Sort exercises by record count (descending), then by name (ascending) for ties
+  const sortedExercises = [...exercises].sort((a, b) => {
+    const countA = exerciseRecordCounts[a.id] || 0;
+    const countB = exerciseRecordCounts[b.id] || 0;
+    
+    if (countB !== countA) {
+      return countB - countA; // Higher count first
+    }
+    
+    return a.name.localeCompare(b.name); // Alphabetical for ties
+  });
+
   return (
     <select
       value={value}
@@ -69,7 +81,7 @@ function ExerciseSelector({ exercises, value, onChange, disabled = false, exerci
       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
     >
       <option value="">Select an exercise</option>
-      {exercises.map((exercise) => {
+      {sortedExercises.map((exercise) => {
         const recordCount = exerciseRecordCounts[exercise.id] || 0;
         return (
           <option key={exercise.id} value={exercise.id}>

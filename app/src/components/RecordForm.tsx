@@ -87,7 +87,17 @@ function SearchableExerciseSelector({
 
   const filteredExercises = exercises.filter((exercise) =>
     exercise.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  ).sort((a, b) => {
+    // Sort by record count (descending), then by name (ascending) for ties
+    const countA = exerciseRecordCounts[a.id] || 0;
+    const countB = exerciseRecordCounts[b.id] || 0;
+    
+    if (countB !== countA) {
+      return countB - countA; // Higher count first
+    }
+    
+    return a.name.localeCompare(b.name); // Alphabetical for ties
+  });
 
   const handleSelectExercise = (exercise: Exercise) => {
     setSearchTerm(exercise.name);
