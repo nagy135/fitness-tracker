@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import {
   Card,
   CardContent,
@@ -85,19 +86,21 @@ function SearchableExerciseSelector({
     setSearchTerm(exercise ? exercise.name : "");
   }, [value, exercises]);
 
-  const filteredExercises = exercises.filter((exercise) =>
-    exercise.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  ).sort((a, b) => {
-    // Sort by record count (descending), then by name (ascending) for ties
-    const countA = exerciseRecordCounts[a.id] || 0;
-    const countB = exerciseRecordCounts[b.id] || 0;
-    
-    if (countB !== countA) {
-      return countB - countA; // Higher count first
-    }
-    
-    return a.name.localeCompare(b.name); // Alphabetical for ties
-  });
+  const filteredExercises = exercises
+    .filter((exercise) =>
+      exercise.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+    .sort((a, b) => {
+      // Sort by record count (descending), then by name (ascending) for ties
+      const countA = exerciseRecordCounts[a.id] || 0;
+      const countB = exerciseRecordCounts[b.id] || 0;
+
+      if (countB !== countA) {
+        return countB - countA; // Higher count first
+      }
+
+      return a.name.localeCompare(b.name); // Alphabetical for ties
+    });
 
   const handleSelectExercise = (exercise: Exercise) => {
     setSearchTerm(exercise.name);
@@ -185,7 +188,10 @@ interface RecordFormProps {
   exerciseRecordCounts?: Record<number, number>; // New prop for record counts
 }
 
-export function RecordForm({ onSuccess, exerciseRecordCounts = {} }: RecordFormProps) {
+export function RecordForm({
+  onSuccess,
+  exerciseRecordCounts = {},
+}: RecordFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDateField, setShowDateField] = useState(false);
@@ -290,9 +296,9 @@ export function RecordForm({ onSuccess, exerciseRecordCounts = {} }: RecordFormP
             />
 
             {/* PR Comparison Display */}
-            <PRComparisonDisplay 
-              exerciseId={form.watch("exerciseId")} 
-              currentSets={form.watch("sets")} 
+            <PRComparisonDisplay
+              exerciseId={form.watch("exerciseId")}
+              currentSets={form.watch("sets")}
             />
 
             <div className="space-y-4">
@@ -357,9 +363,8 @@ export function RecordForm({ onSuccess, exerciseRecordCounts = {} }: RecordFormP
                           <FormItem>
                             <FormLabel>Reps</FormLabel>
                             <FormControl>
-                              <Input
-                                type="number"
-                                min="1"
+                              <NumberInput
+                                min={1}
                                 placeholder="Enter reps count"
                                 {...field}
                               />
@@ -376,10 +381,8 @@ export function RecordForm({ onSuccess, exerciseRecordCounts = {} }: RecordFormP
                           <FormItem>
                             <FormLabel>Weight (kg)</FormLabel>
                             <FormControl>
-                              <Input
-                                type="number"
-                                step="0.1"
-                                min="0"
+                              <NumberInput
+                                min={0}
                                 placeholder="Enter weight"
                                 {...field}
                               />

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -60,16 +61,22 @@ interface ExerciseSelectorProps {
   exerciseRecordCounts?: { [exerciseId: number]: number }; // New prop for record counts
 }
 
-function ExerciseSelector({ exercises, value, onChange, disabled = false, exerciseRecordCounts = {} }: ExerciseSelectorProps) {
+function ExerciseSelector({
+  exercises,
+  value,
+  onChange,
+  disabled = false,
+  exerciseRecordCounts = {},
+}: ExerciseSelectorProps) {
   // Sort exercises by record count (descending), then by name (ascending) for ties
   const sortedExercises = [...exercises].sort((a, b) => {
     const countA = exerciseRecordCounts[a.id] || 0;
     const countB = exerciseRecordCounts[b.id] || 0;
-    
+
     if (countB !== countA) {
       return countB - countA; // Higher count first
     }
-    
+
     return a.name.localeCompare(b.name); // Alphabetical for ties
   });
 
@@ -85,7 +92,8 @@ function ExerciseSelector({ exercises, value, onChange, disabled = false, exerci
         const recordCount = exerciseRecordCounts[exercise.id] || 0;
         return (
           <option key={exercise.id} value={exercise.id}>
-            {exercise.name}{recordCount > 0 ? ` (${recordCount}x)` : ''}
+            {exercise.name}
+            {recordCount > 0 ? ` (${recordCount}x)` : ""}
           </option>
         );
       })}
@@ -99,20 +107,25 @@ interface EditRecordFormProps {
   exerciseRecordCounts?: { [exerciseId: number]: number }; // New prop for record counts
 }
 
-export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }: EditRecordFormProps) {
+export function EditRecordForm({
+  record,
+  onSuccess,
+  exerciseRecordCounts = {},
+}: EditRecordFormProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: exerciseOptions, isLoading: exercisesLoading } = useExerciseOptionsQuery();
+  const { data: exerciseOptions, isLoading: exercisesLoading } =
+    useExerciseOptionsQuery();
   const { updateRecord, isLoading: isUpdating } = useUpdateRecordMutation();
 
   // Prepare initial values from the record
   const getInitialValues = React.useCallback((): UpdateRecordFormData => {
     return {
       exerciseId: record.exerciseId,
-      sets: record.sets.map(set => ({
+      sets: record.sets.map((set) => ({
         reps: set.reps.toString(),
         weight: set.weight.toString(),
       })),
-      date: record.date ? record.date.split('T')[0] : '',
+      date: record.date ? record.date.split("T")[0] : "",
     };
   }, [record]);
 
@@ -130,7 +143,7 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
     try {
       const updateData: UpdateRecordRequest = {
         exerciseId: data.exerciseId,
-        sets: data.sets.map(set => ({
+        sets: data.sets.map((set) => ({
           reps: parseInt(set.reps),
           weight: parseFloat(set.weight),
         })),
@@ -170,7 +183,7 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
   const totalVolume = currentSets.reduce((sum, set) => {
     const reps = parseInt(set.reps) || 0;
     const weight = parseFloat(set.weight) || 0;
-    return sum + (reps * weight);
+    return sum + reps * weight;
   }, 0);
 
   // Reset form when record changes or dialog opens
@@ -202,19 +215,23 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
               <ExerciseSelector
                 exercises={exerciseOptions?.exercises || []}
                 value={form.watch("exerciseId")}
-                onChange={(exerciseId) => form.setValue("exerciseId", exerciseId)}
+                onChange={(exerciseId) =>
+                  form.setValue("exerciseId", exerciseId)
+                }
                 exerciseRecordCounts={exerciseRecordCounts}
               />
             )}
             {form.formState.errors.exerciseId && (
-              <p className="text-sm text-red-500">{form.formState.errors.exerciseId.message}</p>
+              <p className="text-sm text-red-500">
+                {form.formState.errors.exerciseId.message}
+              </p>
             )}
           </div>
 
           {/* PR Comparison Display */}
-          <PRComparisonDisplay 
-            exerciseId={form.watch("exerciseId")} 
-            currentSets={form.watch("sets")} 
+          <PRComparisonDisplay
+            exerciseId={form.watch("exerciseId")}
+            currentSets={form.watch("sets")}
           />
 
           {/* Date */}
@@ -232,18 +249,24 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Sets</Label>
-              <Button type="button" onClick={addSet} variant="outline" size="sm">
+              <Button
+                type="button"
+                onClick={addSet}
+                variant="outline"
+                size="sm"
+              >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Set
               </Button>
             </div>
-            
+
             <div className="space-y-2">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex items-center gap-2">
                   <div className="flex-1">
-                    <Input
+                    <NumberInput
                       placeholder="Reps"
+                      min={1}
                       {...form.register(`sets.${index}.reps`)}
                     />
                     {form.formState.errors.sets?.[index]?.reps && (
@@ -253,8 +276,9 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
                     )}
                   </div>
                   <div className="flex-1">
-                    <Input
+                    <NumberInput
                       placeholder="Weight"
+                      min={0}
                       {...form.register(`sets.${index}.weight`)}
                     />
                     {form.formState.errors.sets?.[index]?.weight && (
@@ -300,9 +324,11 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
                 <div className="w-10"></div> {/* Spacer to align with sets */}
               </div>
             </div>
-            
+
             {form.formState.errors.sets?.root && (
-              <p className="text-sm text-red-500">{form.formState.errors.sets.root.message}</p>
+              <p className="text-sm text-red-500">
+                {form.formState.errors.sets.root.message}
+              </p>
             )}
           </div>
 
@@ -320,4 +346,5 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
       </DialogContent>
     </Dialog>
   );
-} 
+}
+
