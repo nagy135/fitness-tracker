@@ -40,8 +40,8 @@ export default function StatisticsPage() {
               Analyze your workout performance and progress
             </p>
           </div>
-          <Button 
-            onClick={() => router.push("/")} 
+          <Button
+            onClick={() => router.push("/")}
             variant="outline"
             size="sm"
             className="w-full sm:w-auto"
@@ -52,15 +52,11 @@ export default function StatisticsPage() {
 
         <Tabs defaultValue="progress" className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-none sm:max-w-md">
-            <TabsTrigger value="progress" className="text-xs sm:text-sm">Progress</TabsTrigger>
+            <TabsTrigger value="progress" className="text-xs sm:text-sm">
+              Progress
+            </TabsTrigger>
             <TabsTrigger value="volume" className="text-xs sm:text-sm">
               Volume
-            </TabsTrigger>
-            <TabsTrigger value="strength" disabled className="text-xs sm:text-sm">
-              Strength
-            </TabsTrigger>
-            <TabsTrigger value="trends" disabled className="text-xs sm:text-sm">
-              Trends
             </TabsTrigger>
           </TabsList>
 
@@ -71,22 +67,9 @@ export default function StatisticsPage() {
           <TabsContent value="volume" className="mt-6">
             <WorkoutVolumeStatistics />
           </TabsContent>
-
-          <TabsContent value="strength" className="mt-6">
-            <div className="text-center text-gray-500 py-12">
-              <h3 className="text-lg font-semibold mb-2">Strength Metrics</h3>
-              <p>Coming soon - Analyze your strength gains and PRs</p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="trends" className="mt-6">
-            <div className="text-center text-gray-500 py-12">
-              <h3 className="text-lg font-semibold mb-2">Workout Trends</h3>
-              <p>Coming soon - Discover patterns in your training</p>
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
   );
-} 
+}
+
