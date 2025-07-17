@@ -161,6 +161,18 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
     setIsOpen(false);
   };
 
+  // Calculate totals for summary
+  const currentSets = form.watch("sets");
+  const totalReps = currentSets.reduce((sum, set) => {
+    const reps = parseInt(set.reps) || 0;
+    return sum + reps;
+  }, 0);
+  const totalVolume = currentSets.reduce((sum, set) => {
+    const reps = parseInt(set.reps) || 0;
+    const weight = parseFloat(set.weight) || 0;
+    return sum + (reps * weight);
+  }, 0);
+
   // Reset form when record changes or dialog opens
   React.useEffect(() => {
     if (isOpen) {
@@ -263,6 +275,30 @@ export function EditRecordForm({ record, onSuccess, exerciseRecordCounts = {} }:
                   )}
                 </div>
               ))}
+
+              {/* Separator */}
+              <div className="border-t border-gray-200 my-2"></div>
+
+              {/* Summary Row */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <Input
+                    value={totalReps}
+                    disabled
+                    className="bg-gray-50 text-gray-700"
+                    placeholder="Total Reps"
+                  />
+                </div>
+                <div className="flex-1">
+                  <Input
+                    value={`${totalVolume.toFixed(1)}kg`}
+                    disabled
+                    className="bg-gray-50 text-gray-700"
+                    placeholder="Total Volume"
+                  />
+                </div>
+                <div className="w-10"></div> {/* Spacer to align with sets */}
+              </div>
             </div>
             
             {form.formState.errors.sets?.root && (

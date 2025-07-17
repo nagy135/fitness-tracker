@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { ProgressPerExercise } from "@/components/ProgressPerExercise";
+import { WorkoutVolumeStatistics } from "@/components/WorkoutVolumeStatistics";
 
 export default function StatisticsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -52,7 +53,7 @@ export default function StatisticsPage() {
         <Tabs defaultValue="progress" className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-none sm:max-w-md">
             <TabsTrigger value="progress" className="text-xs sm:text-sm">Progress</TabsTrigger>
-            <TabsTrigger value="volume" disabled className="text-xs sm:text-sm">
+            <TabsTrigger value="volume" className="text-xs sm:text-sm">
               Volume
             </TabsTrigger>
             <TabsTrigger value="strength" disabled className="text-xs sm:text-sm">
@@ -68,10 +69,7 @@ export default function StatisticsPage() {
           </TabsContent>
 
           <TabsContent value="volume" className="mt-6">
-            <div className="text-center text-gray-500 py-12">
-              <h3 className="text-lg font-semibold mb-2">Volume Analysis</h3>
-              <p>Coming soon - Track your training volume over time</p>
-            </div>
+            <WorkoutVolumeStatistics />
           </TabsContent>
 
           <TabsContent value="strength" className="mt-6">

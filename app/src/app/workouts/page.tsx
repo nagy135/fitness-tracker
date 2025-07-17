@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { DayPicker } from "react-day-picker";
 import { format, parseISO } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { WorkoutComparisonDisplay } from "@/components/WorkoutComparisonDisplay";
 import "react-day-picker/style.css";
 
 interface WorkoutFormData {
@@ -249,16 +250,26 @@ export default function WorkoutsPage() {
                       </div>
                     </div>
                     {selectedDateStats && selectedDateStats.totalWeight > 0 ? (
-                      <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
-                        <div className="text-sm text-green-700 font-medium">
-                          Total Weight Lifted
+                      <div className="space-y-4">
+                        <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+                          <div className="text-sm text-green-700 font-medium">
+                            Total Weight Lifted
+                          </div>
+                          <div className="text-3xl font-bold text-green-900">
+                            {Math.round(selectedDateStats.totalWeight)}kg
+                          </div>
+                          <div className="text-sm text-green-600 mt-1">
+                            Great workout! 💪
+                          </div>
                         </div>
-                        <div className="text-3xl font-bold text-green-900">
-                          {Math.round(selectedDateStats.totalWeight)}kg
-                        </div>
-                        <div className="text-sm text-green-600 mt-1">
-                          Great workout! 💪
-                        </div>
+
+                        {/* Workout Comparison Display */}
+                        <WorkoutComparisonDisplay
+                          currentWorkoutName={selectedDateStats.workoutName}
+                          currentTotalWeight={selectedDateStats.totalWeight}
+                          workoutStats={workoutStats}
+                          currentDate={selectedDateStats.date}
+                        />
                       </div>
                     ) : (
                       <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -278,40 +289,40 @@ export default function WorkoutsPage() {
                           Loading exercise details...
                         </div>
                       </div>
-                    ) : selectedDateDetails &&
-                      selectedDateDetails.exerciseDetails.length > 0 ? (
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="text-sm text-blue-700 font-medium mb-3">
-                          Exercise Breakdown
+                    ) : selectedDateDetails ? (
+                      selectedDateDetails.exerciseDetails?.length > 0 ? (
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="text-sm text-blue-700 font-medium mb-3">
+                            Exercise Breakdown
+                          </div>
+                          <div className="space-y-2">
+                            {selectedDateDetails.exerciseDetails.map(
+                              (exercise, index) => (
+                                <div
+                                  key={index}
+                                  className="text-sm text-gray-700"
+                                >
+                                  <span className="font-medium text-blue-800">
+                                    {exercise.exerciseName}:
+                                  </span>{" "}
+                                  <span className="font-semibold text-blue-900">
+                                    {Math.round(exercise.totalWeight)}kg
+                                  </span>
+                                  <span className="text-gray-600 ml-2">
+                                    ({formatSets(exercise.setDetails)})
+                                  </span>
+                                </div>
+                              ),
+                            )}
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          {selectedDateDetails.exerciseDetails.map(
-                            (exercise, index) => (
-                              <div
-                                key={index}
-                                className="text-sm text-gray-700"
-                              >
-                                <span className="font-medium text-blue-800">
-                                  {exercise.exerciseName}:
-                                </span>{" "}
-                                <span className="font-semibold text-blue-900">
-                                  {Math.round(exercise.totalWeight)}kg
-                                </span>
-                                <span className="text-gray-600 ml-2">
-                                  ({formatSets(exercise.setDetails)})
-                                </span>
-                              </div>
-                            ),
-                          )}
+                      ) : (
+                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-600">
+                            No exercise records found for this date
+                          </div>
                         </div>
-                      </div>
-                    ) : selectedDateDetails &&
-                      selectedDateDetails.exerciseDetails.length === 0 ? (
-                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="text-sm text-gray-600">
-                          No exercise records found for this date
-                        </div>
-                      </div>
+                      )
                     ) : null}
                   </div>
                 ) : selectedDate ? (
