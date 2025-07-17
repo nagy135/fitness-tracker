@@ -267,7 +267,10 @@ export function EditRecordForm({
                     <NumberInput
                       placeholder="Reps"
                       min={1}
-                      {...form.register(`sets.${index}.reps`)}
+                      value={form.watch(`sets.${index}.reps`)}
+                      onValueChange={(value) =>
+                        form.setValue(`sets.${index}.reps`, value)
+                      }
                     />
                     {form.formState.errors.sets?.[index]?.reps && (
                       <p className="text-xs text-red-500 mt-1">
@@ -279,7 +282,10 @@ export function EditRecordForm({
                     <NumberInput
                       placeholder="Weight"
                       min={0}
-                      {...form.register(`sets.${index}.weight`)}
+                      value={form.watch(`sets.${index}.weight`)}
+                      onValueChange={(value) =>
+                        form.setValue(`sets.${index}.weight`, value)
+                      }
                     />
                     {form.formState.errors.sets?.[index]?.weight && (
                       <p className="text-xs text-red-500 mt-1">
@@ -347,4 +353,3 @@ export function EditRecordForm({
     </Dialog>
   );
 }
-

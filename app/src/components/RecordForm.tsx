@@ -366,7 +366,8 @@ export function RecordForm({
                               <NumberInput
                                 min={1}
                                 placeholder="Enter reps count"
-                                {...field}
+                                value={field.value}
+                                onValueChange={field.onChange}
                               />
                             </FormControl>
                             <FormMessage />
@@ -384,7 +385,8 @@ export function RecordForm({
                               <NumberInput
                                 min={0}
                                 placeholder="Enter weight"
-                                {...field}
+                                value={field.value}
+                                onValueChange={field.onChange}
                               />
                             </FormControl>
                             <FormMessage />
