@@ -82,28 +82,20 @@ export function WorkoutComparisonDisplay({
   }
 
   const difference = currentTotalWeight - previousWorkout.totalWeight;
-  const percentageChange =
-    previousWorkout.totalWeight > 0
-      ? (difference / previousWorkout.totalWeight) * 100
-      : 0;
 
   // Determine the comparison status
   let comparisonStatus = "neutral";
   let comparisonText = "";
-  let differenceText = "";
 
   if (difference > 0) {
     comparisonStatus = "improved";
     comparisonText = `+${difference.toFixed(1)}kg more`;
-    differenceText = `${percentageChange > 0 ? "+" : ""}${percentageChange.toFixed(1)}% vs last time`;
   } else if (difference < 0) {
     comparisonStatus = "decreased";
     comparisonText = `${Math.abs(difference).toFixed(1)}kg less`;
-    differenceText = `${percentageChange.toFixed(1)}% vs last time`;
   } else {
     comparisonStatus = "same";
     comparisonText = "Same weight";
-    differenceText = "No change from last time";
   }
 
   const getStatusColor = () => {
@@ -234,4 +226,3 @@ export function WorkoutComparisonDisplay({
     </div>
   );
 }
-
