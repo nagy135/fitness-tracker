@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState } from "react";
 import { WorkoutStats, DayStats } from "@/lib/types/workout";
 import { WorkoutsAPI } from "@/lib/api/workouts";
+import { formatDistance, parseISO } from "date-fns";
 
 interface WorkoutComparisonDisplayProps {
   currentWorkoutName: string;
@@ -149,6 +150,10 @@ export function WorkoutComparisonDisplay({
     return setDetails.map((set) => `${set.reps}x${set.weight}kg`).join(", ");
   };
 
+  const daysAgo = formatDistance(parseISO(previousWorkout.date), new Date(), {
+    addSuffix: true,
+  });
+
   return (
     <div
       className={`p-4 bg-gradient-to-r ${getStatusColor()} rounded-lg border`}
@@ -220,7 +225,7 @@ export function WorkoutComparisonDisplay({
 
         {/* Previous workout date */}
         <div className={`text-xs ${getTextColor()} opacity-75`}>
-          Last {currentWorkoutName} on {formatDate(previousWorkout.date)}
+          {`Last ${currentWorkoutName} on ${formatDate(previousWorkout.date)} (${daysAgo})`}
         </div>
       </div>
     </div>
