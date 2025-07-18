@@ -101,11 +101,17 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
     return record.date || record.createdAt;
   };
 
+  // Helper function to normalize muscle group names (remove "s" suffix for grouping)
+  const normalizeMuscleGroup = (muscleGroup: string): string => {
+    return muscleGroup.toLowerCase().replace(/s$/, '');
+  };
+
   // Create a map to store muscle group data
   const muscleGroupMap = new Map<string, {
     records: WorkoutRecord[];
     exercises: Set<string>;
     exerciseRecordCounts: Map<string, number>;
+    originalNames: Set<string>; // Track original muscle group names for display
   }>();
 
   // Process each record and group by muscle groups
@@ -119,17 +125,21 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
 
     // Add record to each muscle group it targets
     muscleGroups.forEach(muscleGroup => {
-      if (!muscleGroupMap.has(muscleGroup)) {
-        muscleGroupMap.set(muscleGroup, {
+      const normalizedGroup = normalizeMuscleGroup(muscleGroup);
+      
+      if (!muscleGroupMap.has(normalizedGroup)) {
+        muscleGroupMap.set(normalizedGroup, {
           records: [],
           exercises: new Set(),
           exerciseRecordCounts: new Map(),
+          originalNames: new Set(),
         });
       }
       
-      const groupData = muscleGroupMap.get(muscleGroup)!;
+      const groupData = muscleGroupMap.get(normalizedGroup)!;
       groupData.records.push(record);
       groupData.exercises.add(record.exercise.name);
+      groupData.originalNames.add(muscleGroup); // Keep track of original name
       
       // Track record count for each exercise
       const currentCount = groupData.exerciseRecordCounts.get(record.exercise.name) || 0;
@@ -138,7 +148,7 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
   });
 
   // Convert map to array of MuscleGroupStatistics
-  return Array.from(muscleGroupMap.entries()).map(([muscleGroup, groupData]) => {
+  return Array.from(muscleGroupMap.entries()).map(([normalizedGroup, groupData]) => {
     // Sort records by date
     const sortedRecords = groupData.records.sort(
       (a, b) => new Date(getRecordDate(a)).getTime() - new Date(getRecordDate(b)).getTime()
@@ -199,8 +209,12 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
       return a.localeCompare(b); // Alphabetical for ties
     });
 
+    // Choose the most common original name for display (prefer singular form)
+    const originalNames = Array.from(groupData.originalNames);
+    const displayName = originalNames.find(name => !name.toLowerCase().endsWith('s')) || originalNames[0];
+
     return {
-      muscleGroup,
+      muscleGroup: displayName,
       progress,
       totalRecords: groupData.records.length,
       firstRecordDate: getRecordDate(sortedRecords[0]),
