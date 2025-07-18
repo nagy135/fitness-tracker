@@ -16,6 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Fitness Tracker",
   description: "Track your fitness exercises and progress",
+  icons: {
+    icon: "/dumbbell.svg",
+    shortcut: "/dumbbell.svg",
+    apple: "/dumbbell.svg",
+  },
 };
 
 export default function RootLayout({
@@ -29,9 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-white`}
       >
         <NavigationBar />
-        <main className="pt-20 md:pt-16">
-          {children}
-        </main>
+        <main className="pt-20 md:pt-16">{children}</main>
       </body>
     </html>
   );
