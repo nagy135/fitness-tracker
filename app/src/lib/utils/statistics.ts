@@ -60,7 +60,7 @@ export function processRecordsForStatistics(records: WorkoutRecord[]): ExerciseS
       const recordDate = getRecordDate(record);
       const date = new Date(recordDate).toISOString().split('T')[0]; // YYYY-MM-DD format
       const totalWeight = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
-      
+
       if (progressMap.has(date)) {
         const existing = progressMap.get(date)!;
         progressMap.set(date, {
@@ -117,7 +117,7 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
   // Process each record and group by muscle groups
   records.forEach(record => {
     const muscleGroups = record.exercise.primaryMuscles || [];
-    
+
     // If no muscle groups, skip this record
     if (muscleGroups.length === 0) {
       return;
@@ -126,7 +126,7 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
     // Add record to each muscle group it targets
     muscleGroups.forEach(muscleGroup => {
       const normalizedGroup = normalizeMuscleGroup(muscleGroup);
-      
+
       if (!muscleGroupMap.has(normalizedGroup)) {
         muscleGroupMap.set(normalizedGroup, {
           records: [],
@@ -135,12 +135,12 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
           originalNames: new Set(),
         });
       }
-      
+
       const groupData = muscleGroupMap.get(normalizedGroup)!;
       groupData.records.push(record);
       groupData.exercises.add(record.exercise.name);
       groupData.originalNames.add(muscleGroup); // Keep track of original name
-      
+
       // Track record count for each exercise
       const currentCount = groupData.exerciseRecordCounts.get(record.exercise.name) || 0;
       groupData.exerciseRecordCounts.set(record.exercise.name, currentCount + 1);
@@ -148,16 +148,16 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
   });
 
   // Convert map to array of MuscleGroupStatistics
-  return Array.from(muscleGroupMap.entries()).map(([normalizedGroup, groupData]) => {
+  return Array.from(muscleGroupMap.entries()).map(([, groupData]) => {
     // Sort records by date
     const sortedRecords = groupData.records.sort(
       (a, b) => new Date(getRecordDate(a)).getTime() - new Date(getRecordDate(b)).getTime()
     );
 
     // Calculate total weight per date
-    const progressMap = new Map<string, { 
-      totalWeight: number; 
-      recordCount: number; 
+    const progressMap = new Map<string, {
+      totalWeight: number;
+      recordCount: number;
       exerciseCount: number;
       exercises: Set<string>;
     }>();
@@ -166,7 +166,7 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
       const recordDate = getRecordDate(record);
       const date = new Date(recordDate).toISOString().split('T')[0]; // YYYY-MM-DD format
       const totalWeight = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
-      
+
       if (progressMap.has(date)) {
         const existing = progressMap.get(date)!;
         existing.exercises.add(record.exercise.name);
@@ -201,11 +201,11 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
     const sortedExercises = Array.from(groupData.exercises).sort((a, b) => {
       const countA = groupData.exerciseRecordCounts.get(a) || 0;
       const countB = groupData.exerciseRecordCounts.get(b) || 0;
-      
+
       if (countB !== countA) {
         return countB - countA; // Higher count first
       }
-      
+
       return a.localeCompare(b); // Alphabetical for ties
     });
 
