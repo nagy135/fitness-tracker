@@ -55,7 +55,7 @@ export function WorkoutComparisonDisplay({
     );
 
     return sortedWorkouts.length > 0 ? sortedWorkouts[0] : null;
-  }, [currentWorkoutName, currentTotalWeight, workoutStats, currentDate]);
+  }, [currentWorkoutName, workoutStats, currentDate]);
 
   // Fetch previous workout details when previousWorkout changes
   useEffect(() => {

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { ProgressPerExercise } from "@/components/ProgressPerExercise";
@@ -40,7 +39,6 @@ export default function StatisticsPage() {
               Analyze your workout performance and progress
             </p>
           </div>
-
         </div>
 
         <Tabs defaultValue="progress" className="w-full">
@@ -65,4 +63,3 @@ export default function StatisticsPage() {
     </div>
   );
 }
-
