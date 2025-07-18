@@ -268,6 +268,7 @@ func (h *WorkoutHandler) GetWorkoutStatsByDate(c *fiber.Ctx) error {
 	// Filter records for the specific date and calculate exercise totals
 	exerciseWeights := make(map[string]float32)
 	exerciseSets := make(map[string][]SetDetail)
+	exerciseOrder := make(map[string]time.Time) // Track order of exercises
 	var totalWeight float32
 
 	for _, record := range records {
@@ -295,6 +296,11 @@ func (h *WorkoutHandler) GetWorkoutStatsByDate(c *fiber.Ctx) error {
 			// Add to exercise total
 			exerciseWeights[record.Exercise.Name] += recordWeight
 			totalWeight += recordWeight
+
+			// Track the first occurrence of this exercise (earliest record time)
+			if existingTime, exists := exerciseOrder[record.Exercise.Name]; !exists || record.CreatedAt.Before(existingTime) {
+				exerciseOrder[record.Exercise.Name] = record.CreatedAt
+			}
 		}
 	}
 
@@ -331,10 +337,10 @@ func (h *WorkoutHandler) GetWorkoutStatsByDate(c *fiber.Ctx) error {
 		})
 	}
 
-	// Sort exercise details by weight descending
+	// Sort exercise details by the order they were recorded (creation time)
 	for i := 0; i < len(exerciseDetails); i++ {
 		for j := i + 1; j < len(exerciseDetails); j++ {
-			if exerciseDetails[i].TotalWeight < exerciseDetails[j].TotalWeight {
+			if exerciseOrder[exerciseDetails[i].ExerciseName].After(exerciseOrder[exerciseDetails[j].ExerciseName]) {
 				exerciseDetails[i], exerciseDetails[j] = exerciseDetails[j], exerciseDetails[i]
 			}
 		}
