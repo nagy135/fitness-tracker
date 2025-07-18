@@ -395,52 +395,6 @@ export default function WorkoutsPage() {
                 </CardContent>
               </Card>
             )}
-
-            {/* Recent Workouts */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Workouts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {workouts.slice(0, 5).map((workout) => {
-                    const workoutDate = workout.date || workout.createdAt;
-                    const workoutDateStr = format(
-                      parseISO(workoutDate),
-                      "yyyy-MM-dd",
-                    );
-                    const stats = workoutStats.find((stat) => {
-                      // Extract date part from ISO format (e.g., "2025-07-02T00:00:00Z" -> "2025-07-02")
-                      const statDateStr = stat.date.split("T")[0];
-                      return statDateStr === workoutDateStr;
-                    });
-
-                    return (
-                      <div
-                        key={workout.id}
-                        className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border"
-                      >
-                        <div className="flex-1">
-                          <div className="font-medium">{workout.label}</div>
-                          <div className="text-sm text-gray-500">
-                            {format(parseISO(workoutDate), "MMM d, yyyy")}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          {stats && stats.totalWeight > 0 ? (
-                            <div className="text-lg font-bold text-green-700">
-                              {Math.round(stats.totalWeight)}kg
-                            </div>
-                          ) : (
-                            <div className="text-sm text-gray-400">No data</div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
           </div>
           {/* Stats Summary */}
           {workoutStats?.length > 0 && (
