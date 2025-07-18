@@ -105,6 +105,7 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
   const muscleGroupMap = new Map<string, {
     records: WorkoutRecord[];
     exercises: Set<string>;
+    exerciseRecordCounts: Map<string, number>;
   }>();
 
   // Process each record and group by muscle groups
@@ -122,12 +123,17 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
         muscleGroupMap.set(muscleGroup, {
           records: [],
           exercises: new Set(),
+          exerciseRecordCounts: new Map(),
         });
       }
       
       const groupData = muscleGroupMap.get(muscleGroup)!;
       groupData.records.push(record);
       groupData.exercises.add(record.exercise.name);
+      
+      // Track record count for each exercise
+      const currentCount = groupData.exerciseRecordCounts.get(record.exercise.name) || 0;
+      groupData.exerciseRecordCounts.set(record.exercise.name, currentCount + 1);
     });
   });
 
@@ -181,13 +187,25 @@ export function processRecordsForMuscleGroupStatistics(records: WorkoutRecord[])
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+    // Sort exercises by record count (descending), then by name (ascending) for ties
+    const sortedExercises = Array.from(groupData.exercises).sort((a, b) => {
+      const countA = groupData.exerciseRecordCounts.get(a) || 0;
+      const countB = groupData.exerciseRecordCounts.get(b) || 0;
+      
+      if (countB !== countA) {
+        return countB - countA; // Higher count first
+      }
+      
+      return a.localeCompare(b); // Alphabetical for ties
+    });
+
     return {
       muscleGroup,
       progress,
       totalRecords: groupData.records.length,
       firstRecordDate: getRecordDate(sortedRecords[0]),
       lastRecordDate: getRecordDate(sortedRecords[sortedRecords.length - 1]),
-      exercises: Array.from(groupData.exercises).sort(),
+      exercises: sortedExercises,
     };
   }).sort((a, b) => a.muscleGroup.localeCompare(b.muscleGroup));
 }
