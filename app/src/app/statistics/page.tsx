@@ -40,14 +40,7 @@ export default function StatisticsPage() {
               Analyze your workout performance and progress
             </p>
           </div>
-          <Button
-            onClick={() => router.push("/")}
-            variant="outline"
-            size="sm"
-            className="w-full sm:w-auto"
-          >
-            Back to Home
-          </Button>
+
         </div>
 
         <Tabs defaultValue="progress" className="w-full">

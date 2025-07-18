@@ -155,14 +155,6 @@ export default function RecordsPage() {
             >
               {isLoading ? "Refreshing..." : "Refresh"}
             </Button>
-            <Button 
-              onClick={() => router.push("/")} 
-              variant="outline"
-              size="sm"
-              className="flex-1 sm:flex-none"
-            >
-              Back to Home
-            </Button>
           </div>
         </div>
 

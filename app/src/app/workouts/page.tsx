@@ -166,14 +166,7 @@ export default function WorkoutsPage() {
                 : "Track your workout calendar"}
             </p>
           </div>
-          <Button
-            onClick={() => router.push("/")}
-            variant="outline"
-            size="sm"
-            className="w-full sm:w-auto"
-          >
-            Back to Home
-          </Button>
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
