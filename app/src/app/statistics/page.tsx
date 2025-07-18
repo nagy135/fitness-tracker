@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { ProgressPerExercise } from "@/components/ProgressPerExercise";
 import { WorkoutVolumeStatistics } from "@/components/WorkoutVolumeStatistics";
+import { MuscleGroupsStatistics } from "@/components/MuscleGroupsStatistics";
 
 export default function StatisticsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -41,13 +42,16 @@ export default function StatisticsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="progress" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-none sm:max-w-md">
-            <TabsTrigger value="progress" className="text-xs sm:text-sm">
+        <Tabs defaultValue="progress" >
+          <TabsList className="flex gap-4 sm:gap-8">
+            <TabsTrigger value="progress" className="text-xs sm:text-sm cursor-pointer">
               Progress
             </TabsTrigger>
-            <TabsTrigger value="volume" className="text-xs sm:text-sm">
+            <TabsTrigger value="volume" className="text-xs sm:text-sm cursor-pointer">
               Volume
+            </TabsTrigger>
+            <TabsTrigger value="muscle-groups" className="text-xs sm:text-sm cursor-pointer">
+              Muscle Groups
             </TabsTrigger>
           </TabsList>
 
@@ -57,6 +61,10 @@ export default function StatisticsPage() {
 
           <TabsContent value="volume" className="mt-6">
             <WorkoutVolumeStatistics />
+          </TabsContent>
+
+          <TabsContent value="muscle-groups" className="mt-6">
+            <MuscleGroupsStatistics />
           </TabsContent>
         </Tabs>
       </div>
