@@ -17,10 +17,11 @@ import { EditRecordForm } from "@/components/EditRecordForm";
 import { formatDateTime } from "@/lib/utils/date";
 import { Record } from "@/lib/types/record";
 
-function RecordCard({ record, onRecordUpdated, exerciseRecordCounts }: { 
+function RecordCard({ record, onRecordUpdated, exerciseRecordCounts, records }: { 
   record: Record; 
   onRecordUpdated: () => void; 
   exerciseRecordCounts: { [exerciseId: number]: number };
+  records: Record[];
 }) {
   const totalVolume = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
   
@@ -37,7 +38,12 @@ function RecordCard({ record, onRecordUpdated, exerciseRecordCounts }: {
             <div className="text-sm text-gray-500">
               {record.sets.length} set{record.sets.length !== 1 ? 's' : ''}
             </div>
-            <EditRecordForm record={record} onSuccess={onRecordUpdated} exerciseRecordCounts={exerciseRecordCounts} />
+            <EditRecordForm 
+              record={record} 
+              onSuccess={onRecordUpdated} 
+              exerciseRecordCounts={exerciseRecordCounts} 
+              records={records}
+            />
           </div>
         </div>
         <CardDescription>
@@ -161,7 +167,11 @@ export default function RecordsPage() {
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
           {/* Form Section */}
           <div className="lg:col-span-1">
-            <RecordForm onSuccess={handleRecordCreated} exerciseRecordCounts={exerciseRecordCounts} />
+            <RecordForm 
+              onSuccess={handleRecordCreated} 
+              exerciseRecordCounts={exerciseRecordCounts} 
+              records={data?.records || []}
+            />
           </div>
 
           {/* Records List Section */}
@@ -203,7 +213,13 @@ export default function RecordsPage() {
                       return dateB - dateA; // Sort by newest first
                     })
                     .map((record) => (
-                    <RecordCard key={record.id} record={record} onRecordUpdated={handleRecordUpdated} exerciseRecordCounts={exerciseRecordCounts} />
+                    <RecordCard 
+                      key={record.id} 
+                      record={record} 
+                      onRecordUpdated={handleRecordUpdated} 
+                      exerciseRecordCounts={exerciseRecordCounts} 
+                      records={data?.records || []}
+                    />
                   ))}
                 </div>
               </div>

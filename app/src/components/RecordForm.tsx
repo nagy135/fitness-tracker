@@ -24,8 +24,9 @@ import {
 } from "@/components/ui/form";
 import { useExerciseOptionsQuery } from "@/lib/queries/useExerciseOptionsQuery";
 import { RecordsAPI } from "@/lib/api/records";
-import { CreateRecordRequest } from "@/lib/types/record";
+import { CreateRecordRequest, Record } from "@/lib/types/record";
 import { PRComparisonDisplay } from "@/components/PRComparisonDisplay";
+import { PreviousRecordsSummary } from "@/components/PreviousRecordsSummary";
 
 const setSchema = z.object({
   reps: z
@@ -64,7 +65,7 @@ interface SearchableExerciseSelectorProps {
   onChange: (exerciseId: number | undefined) => void;
   disabled?: boolean;
   placeholder?: string;
-  exerciseRecordCounts?: Record<number, number>; // New prop for record counts
+  exerciseRecordCounts?: { [exerciseId: number]: number }; // New prop for record counts
 }
 
 function SearchableExerciseSelector({
@@ -185,12 +186,14 @@ function SearchableExerciseSelector({
 
 interface RecordFormProps {
   onSuccess: () => void;
-  exerciseRecordCounts?: Record<number, number>; // New prop for record counts
+  exerciseRecordCounts?: { [exerciseId: number]: number }; // New prop for record counts
+  records?: Record[]; // Records data for previous records summary
 }
 
 export function RecordForm({
   onSuccess,
   exerciseRecordCounts = {},
+  records = [],
 }: RecordFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -293,6 +296,12 @@ export function RecordForm({
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+            {/* Previous Records Summary */}
+            <PreviousRecordsSummary 
+              records={records} 
+              exerciseId={form.watch("exerciseId")} 
             />
 
             {/* PR Comparison Display */}

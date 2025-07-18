@@ -22,6 +22,7 @@ import { useUpdateRecordMutation } from "@/lib/queries/useUpdateRecordMutation";
 import { Record, UpdateRecordRequest } from "@/lib/types/record";
 import { Edit2, Plus, Trash2 } from "lucide-react";
 import { PRComparisonDisplay } from "@/components/PRComparisonDisplay";
+import { PreviousRecordsSummary } from "@/components/PreviousRecordsSummary";
 
 const setSchema = z.object({
   reps: z
@@ -105,12 +106,14 @@ interface EditRecordFormProps {
   record: Record;
   onSuccess: () => void;
   exerciseRecordCounts?: { [exerciseId: number]: number }; // New prop for record counts
+  records?: Record[]; // Records data for previous records summary
 }
 
 export function EditRecordForm({
   record,
   onSuccess,
   exerciseRecordCounts = {},
+  records = [],
 }: EditRecordFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { data: exerciseOptions, isLoading: exercisesLoading } =
@@ -227,6 +230,12 @@ export function EditRecordForm({
               </p>
             )}
           </div>
+
+          {/* Previous Records Summary */}
+          <PreviousRecordsSummary 
+            records={records} 
+            exerciseId={form.watch("exerciseId")} 
+          />
 
           {/* PR Comparison Display */}
           <PRComparisonDisplay
