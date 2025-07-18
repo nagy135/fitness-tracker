@@ -21,7 +21,7 @@ export function WorkoutComparisonDisplay({
 
   // Find the previous workout with the same name
   const previousWorkout = useMemo(() => {
-    if (!currentWorkoutName || currentTotalWeight === 0) {
+    if (!currentWorkoutName) {
       return null;
     }
 
@@ -76,8 +76,8 @@ export function WorkoutComparisonDisplay({
     }
   }, [previousWorkout]);
 
-  // Don't show anything if no previous workout found or no current weight
-  if (!previousWorkout || currentTotalWeight === 0) {
+  // Don't show anything if no previous workout found
+  if (!previousWorkout) {
     return null;
   }
 
