@@ -34,7 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-white`}
       >
         <NavigationBar />
-        <main className="pt-20 md:pt-16">{children}</main>
+        <main className="pt-2 md:pt-2">{children}</main>
       </body>
     </html>
   );
