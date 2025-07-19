@@ -12,7 +12,9 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 
 	app.Static("/images", "./public/images")
 
-	app.Post("/login", handlers.NewAuthHandler(db, cfg).Login)
+	authHandler := handlers.NewAuthHandler(db, cfg)
+	app.Post("/login", authHandler.Login)
+	app.Post("/refresh", authHandler.RefreshToken)
 	app.Post("/users", handlers.NewUserHandler(db).CreateUser)
 
 	app.Get("/health", func(c *fiber.Ctx) error {

@@ -12,11 +12,10 @@ export interface ExercisePRResponse {
 
 export class RecordsAPI {
   private static async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+    const response = await AuthService.makeAuthenticatedRequest(`${API_CONFIG.BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...AuthService.getAuthHeaders(),
       },
       ...options,
     });
@@ -38,6 +37,9 @@ export class RecordsAPI {
   static async createRecord(record: CreateRecordRequest): Promise<Record> {
     return this.makeRequest<Record>(API_CONFIG.ENDPOINTS.RECORDS, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(record),
     });
   }
@@ -45,6 +47,9 @@ export class RecordsAPI {
   static async updateRecord(id: number, record: UpdateRecordRequest): Promise<Record> {
     return this.makeRequest<Record>(API_CONFIG.ENDPOINTS.RECORD_BY_ID(id), {
       method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(record),
     });
   }

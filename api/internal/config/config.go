@@ -20,8 +20,10 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	Secret   string
-	Duration time.Duration
+	Secret           string
+	Duration         time.Duration
+	RefreshSecret    string
+	RefreshDuration  time.Duration
 }
 
 type ServerConfig struct {
@@ -41,8 +43,10 @@ func LoadConfig() *Config {
 			Port:     getEnv("DB_PORT", "5432"),
 		},
 		JWT: JWTConfig{
-			Secret:   getEnv("JWT_SECRET", "your-super-secret-key-change-in-production"),
-			Duration: time.Hour * 72,
+			Secret:          getEnv("JWT_SECRET", "your-super-secret-key-change-in-production"),
+			Duration:        time.Hour * 72,
+			RefreshSecret:   getEnv("JWT_REFRESH_SECRET", "your-super-secret-refresh-key-change-in-production"),
+			RefreshDuration: time.Hour * 24 * 7, // 7 days
 		},
 		Server: ServerConfig{
 			Port:         getEnv("SERVER_PORT", "8080"),

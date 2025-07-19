@@ -55,26 +55,108 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	claims := jwt.MapClaims{
+	// Generate access token
+	accessClaims := jwt.MapClaims{
 		"sub":  user.ID,
 		"name": user.Name,
 		"exp":  time.Now().Add(h.cfg.JWT.Duration).Unix(),
+		"type": "access",
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString([]byte(h.cfg.JWT.Secret))
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessTokenString, err := accessToken.SignedString([]byte(h.cfg.JWT.Secret))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to generate token",
+			"error": "Failed to generate access token",
+		})
+	}
+
+	// Generate refresh token
+	refreshClaims := jwt.MapClaims{
+		"sub":  user.ID,
+		"name": user.Name,
+		"exp":  time.Now().Add(h.cfg.JWT.RefreshDuration).Unix(),
+		"type": "refresh",
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshTokenString, err := refreshToken.SignedString([]byte(h.cfg.JWT.RefreshSecret))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to generate refresh token",
+		})
+	}
+
+	return c.JSON(dto.LoginResponseDto{
+		AccessToken:  accessTokenString,
+		RefreshToken: refreshTokenString,
+		User: struct {
+			ID   uint   `json:"id"`
+			Name string `json:"name"`
+		}{
+			ID:   user.ID,
+			Name: user.Name,
+		},
+	})
+}
+
+func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
+	var refreshDto dto.RefreshTokenDto
+	if err := c.BodyParser(&refreshDto); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cannot parse JSON",
+		})
+	}
+
+	if errors := utils.ValidateStruct(refreshDto); len(errors) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Validation failed",
+			"details": errors,
+		})
+	}
+
+	// Parse and validate refresh token
+	token, err := jwt.Parse(refreshDto.RefreshToken, func(token *jwt.Token) (interface{}, error) {
+		return []byte(h.cfg.JWT.RefreshSecret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid refresh token",
+		})
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid token claims",
+		})
+	}
+
+	// Check if it's a refresh token
+	if claims["type"] != "refresh" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid token type",
+		})
+	}
+
+	// Generate new access token
+	accessClaims := jwt.MapClaims{
+		"sub":  claims["sub"],
+		"name": claims["name"],
+		"exp":  time.Now().Add(h.cfg.JWT.Duration).Unix(),
+		"type": "access",
+	}
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessTokenString, err := accessToken.SignedString([]byte(h.cfg.JWT.Secret))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to generate access token",
 		})
 	}
 
 	return c.JSON(fiber.Map{
-		"accessToken": tokenString,
-		"user": fiber.Map{
-			"id":   user.ID,
-			"name": user.Name,
-		},
+		"accessToken": accessTokenString,
 	})
 }

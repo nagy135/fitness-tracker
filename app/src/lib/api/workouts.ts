@@ -4,11 +4,10 @@ import { WorkoutsResponse, CreateWorkoutRequest, Workout, WorkoutStatsResponse, 
 
 export class WorkoutsAPI {
   private static async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+    const response = await AuthService.makeAuthenticatedRequest(`${API_CONFIG.BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...AuthService.getAuthHeaders(),
       },
       ...options,
     });
@@ -38,6 +37,9 @@ export class WorkoutsAPI {
   static async createWorkout(workout: CreateWorkoutRequest): Promise<Workout> {
     return this.makeRequest<Workout>(API_CONFIG.ENDPOINTS.WORKOUTS, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(workout),
     });
   }

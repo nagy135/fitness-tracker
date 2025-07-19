@@ -1,14 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AuthService, LoginCredentials } from '@/lib/auth';
+import { AuthService, LoginCredentials, User } from '@/lib/auth';
 
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setIsAuthenticated(AuthService.isAuthenticated());
+    const token = AuthService.getToken();
+    const userData = AuthService.getUser();
+    
+    setIsAuthenticated(!!token);
+    setUser(userData);
     setIsLoading(false);
   }, []);
 
@@ -16,8 +21,9 @@ export function useAuth() {
     setIsLoading(true);
     try {
       const response = await AuthService.login(credentials);
-      AuthService.saveToken(response.accessToken);
+      AuthService.saveTokens(response.accessToken, response.refreshToken, response.user);
       setIsAuthenticated(true);
+      setUser(response.user);
       return response;
     } catch (error) {
       throw error;
@@ -27,13 +33,15 @@ export function useAuth() {
   };
 
   const logout = () => {
-    AuthService.removeToken();
+    AuthService.removeTokens();
     setIsAuthenticated(false);
+    setUser(null);
   };
 
   return {
     isAuthenticated,
     isLoading,
+    user,
     login,
     logout,
   };

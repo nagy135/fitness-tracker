@@ -105,6 +105,18 @@ Content-Type: application/json
 }
 
 
+### 
+
+# @name refresh-token
+
+POST https://fit-api.infiniter.tech/refresh HTTP/1.1
+Content-Type: application/json
+
+{
+  "refreshToken": "your-refresh-token-here"
+}
+
+
 ### ======================================== ###
 
 
@@ -112,7 +124,7 @@ Content-Type: application/json
 
 # @name create-user
 
-POST https://fit-api.infiniter.tech/users HTTP/1.1
+POST https://localhost:8080/users HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -190,8 +202,8 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "label": "Push Day",
-  "date": "2024-12-15"
+  "date": "2024-12-15",
+  "label": "Push Day"
 }
 
 

@@ -4,11 +4,10 @@ import { Exercise, ExercisesResponse, CreateExerciseRequest } from '@/lib/types/
 
 export class ExercisesAPI {
   private static async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+    const response = await AuthService.makeAuthenticatedRequest(`${API_CONFIG.BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...AuthService.getAuthHeaders(),
       },
       ...options,
     });
@@ -36,7 +35,6 @@ export class ExercisesAPI {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...AuthService.getAuthHeaders(),
       },
       body: JSON.stringify(exercise),
     });
