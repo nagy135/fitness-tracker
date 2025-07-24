@@ -7,6 +7,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
+import { Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -255,8 +256,9 @@ export function RecordForm({
   };
 
   const addSet = () => {
-    if (fields.length > 0) {
-      const lastSet = fields[fields.length - 1];
+    const sets = form.getValues("sets");
+    if (sets.length > 0) {
+      const lastSet = sets[sets.length - 1];
       append({ reps: lastSet.reps, weight: lastSet.weight });
     } else {
       append({ reps: "", weight: "" });
@@ -368,58 +370,64 @@ export function RecordForm({
 
               {fields.map((field, index) => (
                 <Card key={field.id} className="p-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-1 space-y-4">
-                      <FormField
-                        control={form.control}
-                        name={`sets.${index}.reps`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Reps</FormLabel>
-                            <FormControl>
-                              <NumberInput
-                                min={1}
-                                placeholder="Enter reps count"
-                                value={field.value}
-                                onValueChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`sets.${index}.weight`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Weight (kg)</FormLabel>
-                            <FormControl>
-                              <NumberInput
-                                min={0}
-                                placeholder="Enter weight"
-                                value={field.value}
-                                onValueChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  <div className="flex flex-col gap-0">
+                    <div className="flex justify-end mb-1">
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeSet(index)}
+                          aria-label="Remove set"
+                        >
+                          <Trash2 className="w-5 h-5 text-red-500" />
+                        </Button>
+                      )}
                     </div>
-
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeSet(index)}
-                        className="mt-6"
-                      >
-                        Remove
-                      </Button>
-                    )}
+                    <div className="flex flex-col gap-2 w-full">
+                      <div className="flex flex-col w-full">
+                        <FormLabel className="mb-1">Reps</FormLabel>
+                        <FormField
+                          control={form.control}
+                          name={`sets.${index}.reps`}
+                          render={({ field }) => (
+                            <FormItem className="w-full">
+                              <FormControl>
+                                <NumberInput
+                                  min={1}
+                                  placeholder="Enter reps count"
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  secondaryStep={5}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="flex flex-col w-full">
+                        <FormLabel className="mb-1">Weight</FormLabel>
+                        <FormField
+                          control={form.control}
+                          name={`sets.${index}.weight`}
+                          render={({ field }) => (
+                            <FormItem className="w-full">
+                              <FormControl>
+                                <NumberInput
+                                  min={0}
+                                  placeholder="Enter weight"
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  secondaryStep={5}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </Card>
               ))}

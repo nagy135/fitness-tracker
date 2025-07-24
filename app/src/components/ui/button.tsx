@@ -40,17 +40,23 @@ function Button({
   variant,
   size,
   asChild = false,
+  noPadding = false, // new prop
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    noPadding?: boolean;
   }) {
   const Comp = asChild ? Slot : "button";
 
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={
+        noPadding
+          ? cn(buttonVariants({ variant, size, className }), "px-0")
+          : cn(buttonVariants({ variant, size, className }))
+      }
       {...props}
     />
   );

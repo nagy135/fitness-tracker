@@ -8,10 +8,11 @@ interface NumberInputProps extends Omit<React.ComponentProps<"input">, "type"> {
   min?: number | string;
   max?: number | string;
   onValueChange?: (value: string) => void;
+  secondaryStep?: number; // New prop for secondary increment/decrement
 }
 
 const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
-  ({ className, min, max, onValueChange, ...props }, ref) => {
+  ({ className, min, max, onValueChange, secondaryStep, ...props }, ref) => {
     // Convert string props to numbers, always use step=1
     const stepValue = 1; // Always use 1 as step
     const minValue = typeof min === "string" ? parseFloat(min) : min;
@@ -40,22 +41,69 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       }
     };
 
+    const handleSecondaryIncrement = () => {
+      if (!secondaryStep) return;
+      const currentValue = getCurrentValue();
+      const newValue = currentValue + secondaryStep;
+      if (maxValue === undefined || newValue <= maxValue) {
+        const newValueString = newValue.toString();
+        onValueChange?.(newValueString);
+      }
+    };
+
+    const handleSecondaryDecrement = () => {
+      if (!secondaryStep) return;
+      const currentValue = getCurrentValue();
+      const newValue = currentValue - secondaryStep;
+      if (minValue === undefined || newValue >= minValue) {
+        const newValueString = newValue.toString();
+        onValueChange?.(newValueString);
+      }
+    };
+
     const currentValue = getCurrentValue();
 
     return (
       <div className="relative flex items-center">
-        {/* Minus button on the left */}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 w-9 rounded-r-none border-r-0"
-          onClick={handleDecrement}
-          disabled={minValue !== undefined && currentValue <= minValue}
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-
+        {/* Left group: -5 and - */}
+        {secondaryStep ? (
+          <div className="flex">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 rounded-none border-r-0 -mr-px"
+              noPadding
+              onClick={handleSecondaryDecrement}
+              disabled={minValue !== undefined && currentValue - secondaryStep < minValue}
+            >
+              -{secondaryStep}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 rounded-none border-l-0 border-r-0 -mr-px"
+              noPadding
+              onClick={handleDecrement}
+              disabled={minValue !== undefined && currentValue <= minValue}
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 w-9 rounded-r-none border-r-0 px-0"
+            noPadding
+            onClick={handleDecrement}
+            disabled={minValue !== undefined && currentValue <= minValue}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+        )}
         {/* Input field in the middle */}
         <input
           type="number"
@@ -74,18 +122,45 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           max={maxValue}
           {...props}
         />
-
-        {/* Plus button on the right */}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 w-9 rounded-l-none border-l-0"
-          onClick={handleIncrement}
-          disabled={maxValue !== undefined && currentValue >= maxValue}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
+        {/* Right group: + and +5 */}
+        {secondaryStep ? (
+          <div className="flex">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 rounded-none border-r-0 border-l-0 -mr-px"
+              noPadding
+              onClick={handleIncrement}
+              disabled={maxValue !== undefined && currentValue >= maxValue}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 rounded-none border-l-0"
+              noPadding
+              onClick={handleSecondaryIncrement}
+              disabled={maxValue !== undefined && currentValue + secondaryStep > maxValue}
+            >
+              +{secondaryStep}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 w-9 rounded-l-none border-l-0 px-0"
+            noPadding
+            onClick={handleIncrement}
+            disabled={maxValue !== undefined && currentValue >= maxValue}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     );
   },
