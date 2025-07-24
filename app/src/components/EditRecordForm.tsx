@@ -163,7 +163,12 @@ export function EditRecordForm({
   };
 
   const addSet = () => {
-    append({ reps: "", weight: "" });
+    if (fields.length > 0) {
+      const lastSet = fields[fields.length - 1];
+      append({ reps: lastSet.reps, weight: lastSet.weight });
+    } else {
+      append({ reps: "", weight: "" });
+    }
   };
 
   const removeSet = (index: number) => {
