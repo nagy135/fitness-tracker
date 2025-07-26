@@ -20,7 +20,9 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
     const getCurrentValue = () => {
       const numValue = parseFloat(props.value as string);
-      return isNaN(numValue) ? minValue || 0 : numValue;
+      // Always start from 0 when empty, regardless of min value
+      // min value is only enforced when preventing going below it
+      return isNaN(numValue) ? 0 : numValue;
     };
 
     const handleIncrement = () => {

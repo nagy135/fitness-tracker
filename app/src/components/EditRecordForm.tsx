@@ -22,7 +22,7 @@ import { useUpdateRecordMutation } from "@/lib/queries/useUpdateRecordMutation";
 import { Record, UpdateRecordRequest } from "@/lib/types/record";
 import { Edit2, Plus, Trash2 } from "lucide-react";
 import { PRComparisonDisplay } from "@/components/PRComparisonDisplay";
-import { PreviousRecordsSummary } from "@/components/PreviousRecordsSummary";
+import { PRRecordsSummary } from "@/components/PRRecordsSummary";
 
 const setSchema = z.object({
   reps: z
@@ -106,7 +106,7 @@ interface EditRecordFormProps {
   record: Record;
   onSuccess: () => void;
   exerciseRecordCounts?: { [exerciseId: number]: number }; // New prop for record counts
-  records?: Record[]; // Records data for previous records summary
+  records?: Record[]; // Records data for PR records summary
 }
 
 export function EditRecordForm({
@@ -163,8 +163,9 @@ export function EditRecordForm({
   };
 
   const addSet = () => {
-    if (fields.length > 0) {
-      const lastSet = fields[fields.length - 1];
+    const sets = form.getValues("sets");
+    if (sets.length > 0) {
+      const lastSet = sets[sets.length - 1];
       append({ reps: lastSet.reps, weight: lastSet.weight });
     } else {
       append({ reps: "", weight: "" });
@@ -224,8 +225,8 @@ export function EditRecordForm({
             )}
           </div>
 
-          {/* Previous Records Summary */}
-          <PreviousRecordsSummary
+          {/* PR Records Summary */}
+          <PRRecordsSummary
             records={records}
             exerciseId={form.watch("exerciseId")}
           />

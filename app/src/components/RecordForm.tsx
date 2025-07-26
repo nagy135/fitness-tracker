@@ -27,7 +27,7 @@ import { useExerciseOptionsQuery } from "@/lib/queries/useExerciseOptionsQuery";
 import { RecordsAPI } from "@/lib/api/records";
 import { CreateRecordRequest, Record } from "@/lib/types/record";
 import { PRComparisonDisplay } from "@/components/PRComparisonDisplay";
-import { PreviousRecordsSummary } from "@/components/PreviousRecordsSummary";
+import { PRRecordsSummary } from "@/components/PRRecordsSummary";
 
 const setSchema = z.object({
   reps: z
@@ -305,8 +305,8 @@ export function RecordForm({
               )}
             />
 
-            {/* Previous Records Summary */}
-            <PreviousRecordsSummary 
+            {/* PR Records Summary */}
+            <PRRecordsSummary 
               records={records} 
               exerciseId={form.watch("exerciseId")} 
             />

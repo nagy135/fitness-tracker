@@ -12,13 +12,16 @@ export function useExercisePRQuery(exerciseId: number | undefined) {
     if (!exerciseId) {
       setData(null);
       setError(null);
+      setIsLoading(false);
       return;
     }
 
-    const fetchPR = async () => {
-      setIsLoading(true);
-      setError(null);
+    // Clear old data immediately when exerciseId changes to prevent showing wrong exercise data
+    setData(null);
+    setError(null);
+    setIsLoading(true);
 
+    const fetchPR = async () => {
       try {
         const response = await RecordsAPI.getExercisePR(exerciseId);
         setData(response);
