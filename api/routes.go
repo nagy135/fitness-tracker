@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/nagy135/fitness-tracker/database"
@@ -24,8 +26,13 @@ func SetupRoutes(app *fiber.App, db *database.DBInstance, cfg *config.Config) {
 	})
 
 	// JWT middleware for protected routes (everything below requires JWT)
+	// Skip JWT authentication for static files (images)
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.JWT.Secret)},
+		Filter: func(c *fiber.Ctx) bool {
+			// Skip JWT authentication for image routes
+			return strings.HasPrefix(c.Path(), "/images")
+		},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error":   "Invalid or expired JWT",
