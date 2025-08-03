@@ -241,6 +241,18 @@ func (h *RecordHandler) GetExercisePR(c *fiber.Ctx) error {
 		MaxTotalWeight float32 `json:"maxTotalWeight"`
 		Date           string  `json:"date"`
 		RecordID       uint    `json:"recordId"`
+		Sets           []struct {
+			Reps   int     `json:"reps"`
+			Weight float32 `json:"weight"`
+		} `json:"sets"`
+	}
+
+	// Get the exercise to get the weight multiplier
+	var exercise models.Exercise
+	if err := h.db.DB.First(&exercise, exerciseID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Exercise not found",
+		})
 	}
 
 	// Get all records for this exercise and user
@@ -281,6 +293,9 @@ func (h *RecordHandler) GetExercisePR(c *fiber.Ctx) error {
 			recordTotalWeight += set.Weight * float32(set.Reps)
 		}
 
+		// Apply exercise weight multiplier
+		recordTotalWeight *= exercise.TotalWeightMultiplier
+
 		// Add to daily total
 		if existing, exists := dailyTotals[dateKey]; exists {
 			dailyTotals[dateKey] = struct {
@@ -301,14 +316,48 @@ func (h *RecordHandler) GetExercisePR(c *fiber.Ctx) error {
 		}
 	}
 
-	// Find the maximum total weight
+	// Find the maximum total weight and get the corresponding record with sets
 	var maxPR *PRResponse
+	var maxRecord *models.Record
 	for date, data := range dailyTotals {
 		if maxPR == nil || data.totalWeight > maxPR.MaxTotalWeight {
+			// Find the record that contributed to this total
+			for _, record := range records {
+				var recordDate time.Time
+				if record.Date != nil {
+					recordDate = *record.Date
+				} else {
+					recordDate = record.CreatedAt
+				}
+				
+				if recordDate.Format("2006-01-02") == date {
+					maxRecord = &record
+					break
+				}
+			}
+			
 			maxPR = &PRResponse{
 				MaxTotalWeight: data.totalWeight,
 				Date:           date,
 				RecordID:       data.recordID,
+			}
+		}
+	}
+
+	// Add sets data to the PR response
+	if maxPR != nil && maxRecord != nil {
+		maxPR.Sets = make([]struct {
+			Reps   int     `json:"reps"`
+			Weight float32 `json:"weight"`
+		}, len(maxRecord.Sets))
+		
+		for i, set := range maxRecord.Sets {
+			maxPR.Sets[i] = struct {
+				Reps   int     `json:"reps"`
+				Weight float32 `json:"weight"`
+			}{
+				Reps:   set.Reps,
+				Weight: set.Weight,
 			}
 		}
 	}

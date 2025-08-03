@@ -100,9 +100,9 @@ func (h *WorkoutHandler) GetWorkoutStats(c *fiber.Ctx) error {
 		WorkoutName string  `json:"workoutName"`
 	}
 
-	// Get all records with their sets for the user
+	// Get all records with their sets and exercise info for the user
 	var records []models.Record
-	result := h.db.DB.Preload("Sets").Where("user_id = ?", userID).Find(&records)
+	result := h.db.DB.Preload("Sets").Preload("Exercise").Where("user_id = ?", userID).Find(&records)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": result.Error.Error(),
@@ -136,6 +136,9 @@ func (h *WorkoutHandler) GetWorkoutStats(c *fiber.Ctx) error {
 		for _, set := range record.Sets {
 			recordWeight += set.Weight * float32(set.Reps)
 		}
+
+		// Apply exercise weight multiplier
+		recordWeight *= record.Exercise.TotalWeightMultiplier
 
 		// Add to daily total
 		dailyWeights[dateStr] += recordWeight
@@ -292,6 +295,9 @@ func (h *WorkoutHandler) GetWorkoutStatsByDate(c *fiber.Ctx) error {
 					Weight: set.Weight,
 				})
 			}
+
+			// Apply exercise weight multiplier
+			recordWeight *= record.Exercise.TotalWeightMultiplier
 
 			// Add to exercise total
 			exerciseWeights[record.Exercise.Name] += recordWeight

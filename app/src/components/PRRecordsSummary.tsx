@@ -4,6 +4,7 @@ import React from "react";
 import { formatDateTime } from "@/lib/utils/date";
 import { Record } from "@/lib/types/record";
 import { useExercisePRQuery } from "@/lib/queries/useExercisePRQuery";
+import { useExerciseQuery } from "@/lib/queries/useExerciseQuery";
 
 interface PRRecordsSummaryProps {
   records: Record[];
@@ -13,6 +14,7 @@ interface PRRecordsSummaryProps {
 
 export function PRRecordsSummary({ records, exerciseId, className = "" }: PRRecordsSummaryProps) {
   const { data: prData, isLoading, error } = useExercisePRQuery(exerciseId);
+  const { data: exercise } = useExerciseQuery(exerciseId ? exerciseId.toString() : "0");
 
   if (!exerciseId) {
     return null;
@@ -64,6 +66,11 @@ export function PRRecordsSummary({ records, exerciseId, className = "" }: PRReco
             Sets data not available
           </div>
         </div>
+        {exercise && exercise.totalWeightMultiplier !== 1.0 && (
+          <div className="text-xs text-blue-600 mt-1">
+            ⚡ PR adjusted for {exercise.totalWeightMultiplier}x multiplier
+          </div>
+        )}
       </div>
     );
   }
@@ -87,6 +94,11 @@ export function PRRecordsSummary({ records, exerciseId, className = "" }: PRReco
           {prRecord.sets.length} set{prRecord.sets.length !== 1 ? 's' : ''}: {prRecord.sets.map(set => `${set.reps}×${set.weight}kg`).join(', ')}
         </div>
       </div>
+      {exercise && exercise.totalWeightMultiplier !== 1.0 && (
+        <div className="text-xs text-blue-600 mt-1">
+          ⚡ PR adjusted for {exercise.totalWeightMultiplier}x multiplier
+        </div>
+      )}
     </div>
   );
 } 

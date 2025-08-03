@@ -19,10 +19,11 @@ import {
 } from "@/components/ui/dialog";
 import { useExerciseOptionsQuery } from "@/lib/queries/useExerciseOptionsQuery";
 import { useUpdateRecordMutation } from "@/lib/queries/useUpdateRecordMutation";
-import { Record, UpdateRecordRequest } from "@/lib/types/record";
+import { Record, UpdateRecordRequest, PRSet } from "@/lib/types/record";
 import { Edit2, Plus, Trash2 } from "lucide-react";
 import { PRComparisonDisplay } from "@/components/PRComparisonDisplay";
 import { PRRecordsSummary } from "@/components/PRRecordsSummary";
+import { PRCopyButton } from "@/components/PRCopyButton";
 
 const setSchema = z.object({
   reps: z
@@ -178,6 +179,19 @@ export function EditRecordForm({
     }
   };
 
+  const handleCopyPRSets = (prSets: PRSet[]) => {
+    // Clear existing sets
+    remove();
+    
+    // Add PR sets to the form
+    prSets.forEach(set => {
+      append({ 
+        reps: set.reps.toString(), 
+        weight: set.weight.toString() 
+      });
+    });
+  };
+
   const handleCancel = () => {
     form.reset(getInitialValues());
     setIsOpen(false);
@@ -235,6 +249,13 @@ export function EditRecordForm({
           <PRComparisonDisplay
             exerciseId={form.watch("exerciseId")}
             currentSets={form.watch("sets")}
+          />
+
+          {/* PR Copy Button */}
+          <PRCopyButton
+            exerciseId={form.watch("exerciseId")}
+            onCopySets={handleCopyPRSets}
+            disabled={isUpdating}
           />
 
           {/* Date */}

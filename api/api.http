@@ -2,7 +2,7 @@
 
 # @name get-all-exercises
 
-GET https://fit-api.infiniter.tech/exercises HTTP/1.1
+GET http://localhost:8080/exercises HTTP/1.1
 Authorization: Bearer {{accessToken}}
 
 
@@ -96,7 +96,7 @@ Authorization: Bearer {{accessToken}}
 
 # @name login
 
-POST https://fit-api.infiniter.tech/login HTTP/1.1
+POST http://localhost:8080/login HTTP/1.1
 Content-Type: application/json
 
 {
@@ -124,7 +124,7 @@ Content-Type: application/json
 
 # @name create-user
 
-POST https://localhost:8080/users HTTP/1.1
+POST http://localhost:8080/users HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useExercisePRQuery } from '@/lib/queries/useExercisePRQuery';
+import { useExerciseQuery } from '@/lib/queries/useExerciseQuery';
 
 interface Set {
   reps: string;
@@ -13,6 +14,7 @@ interface PRComparisonDisplayProps {
 
 export function PRComparisonDisplay({ exerciseId, currentSets }: PRComparisonDisplayProps) {
   const { data, isLoading, error } = useExercisePRQuery(exerciseId);
+  const { data: exercise } = useExerciseQuery(exerciseId ? exerciseId.toString() : "0");
 
   // Don't show anything if no exercise is selected
   if (!exerciseId) {
@@ -25,6 +27,11 @@ export function PRComparisonDisplay({ exerciseId, currentSets }: PRComparisonDis
     const weight = parseFloat(set.weight) || 0;
     return total + (reps * weight);
   }, 0);
+
+  // Apply exercise weight multiplier if available
+  const adjustedTotalVolume = exercise 
+    ? currentTotalVolume * exercise.totalWeightMultiplier
+    : currentTotalVolume;
 
   if (isLoading) {
     return (
@@ -49,11 +56,11 @@ export function PRComparisonDisplay({ exerciseId, currentSets }: PRComparisonDis
   let statusColor = 'text-gray-600';
 
   if (pr) {
-    if (currentTotalVolume === 0) {
+    if (adjustedTotalVolume === 0) {
       status = `PR: ${Math.round(pr.maxTotalWeight)}kg`;
       statusColor = 'text-gray-600';
     } else {
-      const difference = currentTotalVolume - pr.maxTotalWeight;
+      const difference = adjustedTotalVolume - pr.maxTotalWeight;
       
       if (difference > 0) {
         status = `+${difference.toFixed(1)}kg above PR`;
@@ -75,10 +82,15 @@ export function PRComparisonDisplay({ exerciseId, currentSets }: PRComparisonDis
     <div className="p-2 bg-gray-50 rounded border text-xs">
       <div className="flex items-center justify-between">
         <span className="text-gray-600">
-          {currentTotalVolume > 0 ? `Current: ${currentTotalVolume.toFixed(1)}kg` : 'Current Volume'}
+          {adjustedTotalVolume > 0 ? `Current: ${adjustedTotalVolume.toFixed(1)}kg` : 'Current Volume'}
         </span>
         <span className={statusColor}>{status}</span>
       </div>
+      {exercise && exercise.totalWeightMultiplier !== 1.0 && (
+        <div className="text-xs text-blue-600 mt-1">
+          ⚡ Adjusted for {exercise.totalWeightMultiplier}x multiplier
+        </div>
+      )}
     </div>
   );
 } 

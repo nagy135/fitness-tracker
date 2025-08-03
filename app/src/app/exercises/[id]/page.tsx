@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useExerciseQuery } from '@/lib/queries/useExerciseQuery';
+import { EditExerciseForm } from '@/components/EditExerciseForm';
 import { formatDateTime } from '@/lib/utils/date';
 
 interface ExerciseDetailPageProps {
@@ -50,6 +51,13 @@ export default function ExerciseDetailPage({ params }: ExerciseDetailPageProps) 
             </p>
           </div>
           <div className="flex gap-2 sm:gap-4">
+            {exercise && (
+              <EditExerciseForm
+                exercise={exercise}
+                onSubmit={refetch}
+                isLoading={isLoading}
+              />
+            )}
             <Button 
               onClick={() => refetch()}
               variant="outline"
@@ -121,6 +129,14 @@ export default function ExerciseDetailPage({ params }: ExerciseDetailPageProps) 
                       <p><span className="font-medium">ID:</span> {exercise.id}</p>
                       <p><span className="font-medium">Created:</span> {formatDateTime(exercise.createdAt)}</p>
                       <p><span className="font-medium">Updated:</span> {formatDateTime(exercise.updatedAt)}</p>
+                      {exercise.totalWeightMultiplier !== 1.0 && (
+                        <p>
+                          <span className="font-medium">Weight Multiplier:</span>{" "}
+                          <span className="text-blue-600 font-medium">
+                            {exercise.totalWeightMultiplier}x (halved weight - uses pulleys)
+                          </span>
+                        </p>
+                      )}
                     </div>
                   </div>
                   

@@ -1,14 +1,8 @@
 import { AuthService } from '@/lib/auth';
 import { API_CONFIG } from '@/lib/config/api';
-import { RecordsResponse, CreateRecordRequest, UpdateRecordRequest, Record, ExerciseOptionsResponse } from '@/lib/types/record';
+import { RecordsResponse, CreateRecordRequest, UpdateRecordRequest, Record, ExerciseOptionsResponse, PRResponse } from '@/lib/types/record';
 
-export interface ExercisePRResponse {
-  pr: {
-    maxTotalWeight: number;
-    date: string;
-    recordId: number;
-  } | null;
-}
+export type ExercisePRResponse = PRResponse;
 
 export class RecordsAPI {
   private static async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {

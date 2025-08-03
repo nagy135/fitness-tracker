@@ -28,6 +28,8 @@ import { RecordsAPI } from "@/lib/api/records";
 import { CreateRecordRequest, Record } from "@/lib/types/record";
 import { PRComparisonDisplay } from "@/components/PRComparisonDisplay";
 import { PRRecordsSummary } from "@/components/PRRecordsSummary";
+import { PRCopyButton } from "@/components/PRCopyButton";
+import { PRSet } from "@/lib/types/record";
 
 const setSchema = z.object({
   reps: z
@@ -271,6 +273,19 @@ export function RecordForm({
     }
   };
 
+  const handleCopyPRSets = (prSets: PRSet[]) => {
+    // Clear existing sets
+    remove();
+    
+    // Add PR sets to the form
+    prSets.forEach(set => {
+      append({ 
+        reps: set.reps.toString(), 
+        weight: set.weight.toString() 
+      });
+    });
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -315,6 +330,13 @@ export function RecordForm({
             <PRComparisonDisplay
               exerciseId={form.watch("exerciseId")}
               currentSets={form.watch("sets")}
+            />
+
+            {/* PR Copy Button */}
+            <PRCopyButton
+              exerciseId={form.watch("exerciseId")}
+              onCopySets={handleCopyPRSets}
+              disabled={isSubmitting}
             />
 
             <div className="space-y-4">

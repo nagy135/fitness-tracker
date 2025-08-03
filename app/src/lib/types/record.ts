@@ -50,4 +50,18 @@ export interface ExerciseOption {
 export interface ExerciseOptionsResponse {
   exercises: ExerciseOption[];
   count: number;
+}
+
+export interface PRSet {
+  reps: number;
+  weight: number;
+}
+
+export interface PRResponse {
+  pr: {
+    maxTotalWeight: number;
+    date: string;
+    recordId: number;
+    sets: PRSet[];
+  } | null;
 } 

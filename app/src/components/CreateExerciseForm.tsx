@@ -20,6 +20,7 @@ interface CreateExerciseFormData {
   name: string;
   primaryMuscles: string;
   instructions: string;
+  totalWeightMultiplier: boolean;
 }
 
 interface CreateExerciseFormProps {
@@ -27,6 +28,7 @@ interface CreateExerciseFormProps {
     name: string;
     primaryMuscles: string[];
     instructions: string;
+    totalWeightMultiplier?: number;
   }) => Promise<void>;
   isLoading: boolean;
 }
@@ -64,6 +66,7 @@ export function CreateExerciseForm({ onSubmit, isLoading }: CreateExerciseFormPr
         name: data.name,
         primaryMuscles: muscles,
         instructions: data.instructions,
+        totalWeightMultiplier: data.totalWeightMultiplier ? 0.5 : 1.0,
       });
       
       // Reset form and close dialog
@@ -180,6 +183,26 @@ export function CreateExerciseForm({ onSubmit, isLoading }: CreateExerciseFormPr
             {errors.instructions && (
               <p className="text-sm text-red-500">{errors.instructions.message}</p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="totalWeightMultiplier"
+                {...register("totalWeightMultiplier")}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="totalWeightMultiplier"
+                className="text-sm font-medium text-gray-700"
+              >
+                This exercise uses pulleys (halved weight)
+              </label>
+            </div>
+            <p className="text-xs text-gray-500">
+              Check this if the exercise uses pulleys or similar equipment that halves the effective weight
+            </p>
           </div>
 
           <DialogFooter>

@@ -15,6 +15,9 @@ type Exercise struct {
 	// Required field
 	Name string `json:"name" gorm:"not null"`
 
+	// Weight multiplier for exercises with pulleys (default 1.0, 0.5 for halved weight)
+	TotalWeightMultiplier float32 `json:"totalWeightMultiplier" gorm:"default:1.0"`
+
 	// Optional fields from external API
 	ExternalID       *string `json:"externalId,omitempty" gorm:"uniqueIndex"`
 	Force            *string `json:"force,omitempty"`

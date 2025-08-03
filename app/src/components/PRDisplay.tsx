@@ -1,5 +1,6 @@
 import React from 'react';
 import { useExercisePRQuery } from '@/lib/queries/useExercisePRQuery';
+import { useExerciseQuery } from '@/lib/queries/useExerciseQuery';
 
 interface PRDisplayProps {
   exerciseId: number | undefined;
@@ -7,6 +8,7 @@ interface PRDisplayProps {
 
 export function PRDisplay({ exerciseId }: PRDisplayProps) {
   const { data, isLoading, error } = useExercisePRQuery(exerciseId);
+  const { data: exercise } = useExerciseQuery(exerciseId ? exerciseId.toString() : "0");
 
   // Don't show anything if no exercise is selected
   if (!exerciseId) {
@@ -48,6 +50,11 @@ export function PRDisplay({ exerciseId }: PRDisplayProps) {
       {pr && (
         <div className="text-xs text-purple-600 mt-1">
           Set on {new Date(pr.date).toLocaleDateString()}
+        </div>
+      )}
+      {exercise && exercise.totalWeightMultiplier !== 1.0 && (
+        <div className="text-xs text-blue-600 mt-1">
+          ⚡ PR adjusted for {exercise.totalWeightMultiplier}x multiplier
         </div>
       )}
     </div>

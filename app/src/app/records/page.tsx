@@ -24,6 +24,7 @@ function RecordCard({ record, onRecordUpdated, exerciseRecordCounts, records }: 
   records: Record[];
 }) {
   const totalVolume = record.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
+  const adjustedTotalVolume = totalVolume * record.exercise.totalWeightMultiplier;
   
   // Use custom date if available, otherwise use createdAt
   const displayDate = record.date ? record.date : record.createdAt;
@@ -59,10 +60,16 @@ function RecordCard({ record, onRecordUpdated, exerciseRecordCounts, records }: 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-2xl font-bold">
-              {totalVolume.toFixed(1)} kg total
+              {adjustedTotalVolume.toFixed(1)} kg total
             </div>
             <div className="text-sm text-gray-500">Record #{record.id}</div>
           </div>
+          
+          {record.exercise.totalWeightMultiplier !== 1.0 && (
+            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+              ⚡ Adjusted for {record.exercise.totalWeightMultiplier}x multiplier (raw: {totalVolume.toFixed(1)}kg)
+            </div>
+          )}
           
           <div className="space-y-2">
             <div className="text-sm font-medium">Sets:</div>

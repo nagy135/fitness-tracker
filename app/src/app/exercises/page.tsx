@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useExercisesQuery } from "@/lib/queries/useExercisesQuery";
 import { useCreateExerciseMutation } from "@/lib/queries/useCreateExerciseMutation";
 import { CreateExerciseForm } from "@/components/CreateExerciseForm";
+import { EditExerciseForm } from "@/components/EditExerciseForm";
 import { formatDate } from "@/lib/utils/date";
 
 function ExercisesContent() {
@@ -94,6 +95,7 @@ function ExercisesContent() {
     name: string;
     primaryMuscles: string[];
     instructions: string;
+    totalWeightMultiplier?: number;
   }) => {
     await createExercise(data);
     refetch(); // Refresh the exercises list
@@ -205,16 +207,26 @@ function ExercisesContent() {
                   <div className="text-sm text-gray-600 space-y-1">
                     <p>Created: {formatDate(exercise.createdAt)}</p>
                     <p>Updated: {formatDate(exercise.updatedAt)}</p>
+                    {exercise.totalWeightMultiplier !== 1.0 && (
+                      <p className="text-blue-600 font-medium">
+                        ⚡ Halved weight (pulleys)
+                      </p>
+                    )}
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-4 flex gap-2">
                     <Button
                       onClick={() => handleExerciseClick(exercise.id)}
                       variant="outline"
                       size="sm"
-                      className="w-full"
+                      className="flex-1"
                     >
                       View Details
                     </Button>
+                    <EditExerciseForm
+                      exercise={exercise}
+                      onSubmit={refetch}
+                      isLoading={isLoading}
+                    />
                   </div>
                 </CardContent>
               </Card>

@@ -1,6 +1,6 @@
 import { AuthService } from '@/lib/auth';
 import { API_CONFIG } from '@/lib/config/api';
-import { Exercise, ExercisesResponse, CreateExerciseRequest } from '@/lib/types/exercise';
+import { Exercise, ExercisesResponse, CreateExerciseRequest, UpdateExerciseRequest } from '@/lib/types/exercise';
 
 export class ExercisesAPI {
   private static async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -33,6 +33,16 @@ export class ExercisesAPI {
   static async createExercise(exercise: CreateExerciseRequest): Promise<Exercise> {
     return this.makeRequest<Exercise>(API_CONFIG.ENDPOINTS.EXERCISES, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(exercise),
+    });
+  }
+
+  static async updateExercise(id: string | number, exercise: UpdateExerciseRequest): Promise<Exercise> {
+    return this.makeRequest<Exercise>(API_CONFIG.ENDPOINTS.EXERCISE_BY_ID(id), {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
