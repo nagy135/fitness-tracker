@@ -37,6 +37,9 @@ WORKDIR /app
 # Copy the binary from builder stage
 COPY --from=builder /app/main .
 
+# Copy the public directory for static files
+COPY --from=builder /app/public ./public
+
 # Change ownership to non-root user
 RUN chown -R appuser:appgroup /app
 
