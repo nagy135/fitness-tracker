@@ -24,7 +24,7 @@ services:
       - NODE_ENV=production
       
   db:
-    image: postgres:alpine
+    image: postgres:latest
     env_file:
       - api/.env.postgres
     ports:
