@@ -1,50 +1,69 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth } from '@/hooks/useAuth';
+import { AuthService } from '@/lib/auth';
 
-const loginSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  pass: z.string().min(1, 'Password is required'),
+const signupSchema = z.object({
+  name: z.string()
+    .min(1, 'Name is required')
+    .min(3, 'Name must be at least 3 characters'),
+  pass: z.string()
+    .min(1, 'Password is required')
+    .min(6, 'Password must be at least 6 characters'),
+  confirmPass: z.string()
+    .min(1, 'Please confirm your password'),
+}).refine((data) => data.pass === data.confirmPass, {
+  message: "Passwords don't match",
+  path: ["confirmPass"],
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type SignUpFormData = z.infer<typeof signupSchema>;
 
-interface LoginFormProps {
+interface SignUpFormProps {
   onSuccess: () => void;
 }
 
-export function LoginForm({ onSuccess }: LoginFormProps) {
-  const { login } = useAuth();
+export function SignUpForm({ onSuccess }: SignUpFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<SignUpFormData>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       name: '',
       pass: '',
+      confirmPass: '',
     },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: SignUpFormData) => {
     setIsSubmitting(true);
     setError(null);
+    setSuccessMessage(null);
 
     try {
-      await login(data);
-      onSuccess();
+      await AuthService.signup({
+        name: data.name,
+        pass: data.pass,
+      });
+      
+      setSuccessMessage('Account created successfully! Redirecting to login...');
+      
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : 'Sign up failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -53,9 +72,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Login</CardTitle>
+        <CardTitle>Create Account</CardTitle>
         <CardDescription>
-          Enter your credentials to access your fitness tracker
+          Sign up to start tracking your fitness progress
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -91,31 +110,53 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="confirmPass"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      placeholder="Confirm your password" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {error && (
               <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
                 {error}
               </div>
             )}
+            {successMessage && (
+              <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+                {successMessage}
+              </div>
+            )}
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || !!successMessage}
             >
-              {isSubmitting ? 'Logging in...' : 'Login'}
+              {isSubmitting ? 'Creating Account...' : 'Sign Up'}
             </Button>
             <div className="text-sm text-center text-gray-600">
-              Don't have an account?{' '}
+              Already have an account?{' '}
               <button
                 type="button"
-                onClick={() => router.push('/auth/signup')}
+                onClick={() => router.push('/auth/login')}
                 className="text-blue-600 hover:underline font-medium"
               >
-                Sign up here
+                Log in here
               </button>
             </div>
-           </form>
-         </Form>
-       </CardContent>
-     </Card>
-   );
- }
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}

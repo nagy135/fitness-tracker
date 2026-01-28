@@ -20,6 +20,16 @@ export interface RefreshResponse {
   accessToken: string;
 }
 
+export interface SignUpCredentials {
+  name: string;
+  pass: string;
+}
+
+export interface SignUpResponse {
+  id: number;
+  name: string;
+}
+
 export class AuthService {
   private static readonly TOKEN_KEY = 'fitness_tracker_token';
   private static readonly REFRESH_TOKEN_KEY = 'fitness_tracker_refresh_token';
@@ -36,6 +46,23 @@ export class AuthService {
 
     if (!response.ok) {
       throw new Error('Login failed');
+    }
+
+    return response.json();
+  }
+
+  static async signup(credentials: SignUpCredentials): Promise<SignUpResponse> {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Sign up failed');
     }
 
     return response.json();
