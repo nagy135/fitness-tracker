@@ -27,11 +27,7 @@ const signupSchema = z.object({
 
 type SignUpFormData = z.infer<typeof signupSchema>;
 
-interface SignUpFormProps {
-  onSuccess: () => void;
-}
-
-export function SignUpForm({ onSuccess }: SignUpFormProps) {
+export function SignUpForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
