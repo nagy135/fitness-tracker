@@ -34,7 +34,7 @@ export default function SignUpPage() {
           <h1 className="text-2xl font-bold mb-2 sm:text-3xl">Fitness Tracker</h1>
           <p className="text-gray-600 text-sm sm:text-base">Create your account to get started</p>
         </div>
-        <SignUpForm onSuccess={() => {}} />
+        <SignUpForm />
       </div>
     </div>
   );
