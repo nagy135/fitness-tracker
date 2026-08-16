@@ -10,7 +10,7 @@
 ## Deployment
 
 - The production checkout is `~/services/fitness-tracker` on `infiniter@nixpi.local`.
-- The production stack is defined in `docker-compose.prod.yml`.
+- The production host uses an ignored, host-local `docker-compose.yml`. Preserve it; do not replace it with the tracked Compose files.
 - When the user says **"push and deploy"**, they authorize committing and pushing the scoped changes from the current workspace, followed by deploying them on the production host.
 - Commit only files that belong to the requested change. Do not include unrelated existing modifications.
 - Before deployment, run appropriate local validation and push the current branch to its configured upstream.
@@ -20,7 +20,7 @@
   ssh infiniter@nixpi.local
   cd ~/services/fitness-tracker
   git pull --ff-only
-  docker compose -f docker-compose.prod.yml up -d --build
+  docker compose up -d --build
   ```
 
 - After deployment, verify the Compose services are running and report any build or health failures.
