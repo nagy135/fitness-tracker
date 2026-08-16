@@ -155,8 +155,8 @@ export function NavigationBar() {
         </div>
       </nav>
 
-      {/* Spacer for the fixed top navigation */}
-      <div className="h-12 md:h-14" aria-hidden="true" />
+      {/* Spacer for the fixed desktop navigation */}
+      <div className="hidden h-14 md:block" aria-hidden="true" />
 
       {/* Mobile Bottom Navigation - Fixed */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
