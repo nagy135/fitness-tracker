@@ -40,8 +40,8 @@ COPY --from=builder /app/main .
 # Copy the public directory for static files
 COPY --from=builder /app/public ./public
 
-# Change ownership to non-root user
-RUN chown -R appuser:appgroup /app
+# Create the SQLite data directory and make it writable by the application.
+RUN mkdir -p /data && chown -R appuser:appgroup /app /data
 
 # Switch to non-root user
 USER appuser
@@ -50,4 +50,4 @@ USER appuser
 EXPOSE 8080
 
 # Run the application
-CMD ["./main"] 
+CMD ["./main"]

@@ -2,3 +2,7 @@
 tmp
 http-client.env.json
 public/images
+/fitness-tracker
+*.db
+*.db-shm
+*.db-wal

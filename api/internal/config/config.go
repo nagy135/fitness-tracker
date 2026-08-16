@@ -12,18 +12,14 @@ type Config struct {
 }
 
 type DatabaseConfig struct {
-	Host     string
-	User     string
-	Password string
-	Name     string
-	Port     string
+	Path string
 }
 
 type JWTConfig struct {
-	Secret           string
-	Duration         time.Duration
-	RefreshSecret    string
-	RefreshDuration  time.Duration
+	Secret          string
+	Duration        time.Duration
+	RefreshSecret   string
+	RefreshDuration time.Duration
 }
 
 type ServerConfig struct {
@@ -36,11 +32,7 @@ type ServerConfig struct {
 func LoadConfig() *Config {
 	return &Config{
 		Database: DatabaseConfig{
-			Host:     getEnv("DB_HOST", "db"),
-			User:     getEnv("DB_USER", "postgres"),
-			Password: getEnv("DB_PASSWORD", "password"),
-			Name:     getEnv("DB_NAME", "fitness_tracker"),
-			Port:     getEnv("DB_PORT", "5432"),
+			Path: getEnv("DB_PATH", "fitness_tracker.db"),
 		},
 		JWT: JWTConfig{
 			Secret:          getEnv("JWT_SECRET", "your-super-secret-key-change-in-production"),

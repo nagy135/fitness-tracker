@@ -1,26 +1,19 @@
-version: '3.8'
-
 services:
-  api :
-   container_name: fitness-tracker
-   working_dir: /app
-   image: cosmtrek/air
-   env_file:
-     - api/.env
-   volumes:
-     - ./api:/app
-   ports:
-     - 8080:8080
-   command: sh -c "air"
-   
-  db:
-    image: postgres:alpine
+  api:
+    container_name: fitness-tracker
+    working_dir: /app
+    image: cosmtrek/air
     env_file:
-      - api/.env.postgres
+      - path: api/.env
+        required: false
+    environment:
+      DB_PATH: /data/fitness_tracker.db
     ports:
-      - "15432:5432"
+      - "8080:8080"
     volumes:
-      - postgres-db:/var/lib/postgresql/data
+      - ./api:/app
+      - sqlite-data:/data
+    command: sh -c "air"
 
 volumes:
-  postgres-db:
+  sqlite-data:

@@ -1,16 +1,19 @@
-version: '3.8'
-
 services:
-  api :
-   container_name: fitness-tracker
-   build:
-     context: ./api
-     dockerfile: Dockerfile.prod
-   env_file:
-     - api/.env
-   ports:
-     - 8080:8080
-   
+  api:
+    container_name: fitness-tracker
+    build:
+      context: ./api
+      dockerfile: Dockerfile.prod
+    env_file:
+      - path: api/.env
+        required: false
+    environment:
+      DB_PATH: /data/fitness_tracker.db
+    ports:
+      - "8080:8080"
+    volumes:
+      - sqlite-data:/data
+
   frontend:
     container_name: fitness-tracker-frontend
     build:
@@ -21,16 +24,7 @@ services:
     depends_on:
       - api
     environment:
-      - NODE_ENV=production
-      
-  db:
-    image: postgres:latest
-    env_file:
-      - api/.env.postgres
-    ports:
-      - "15432:5432"
-    volumes:
-      - postgres-db:/var/lib/postgresql/data
+      NODE_ENV: production
 
 volumes:
-  postgres-db:
+  sqlite-data:
