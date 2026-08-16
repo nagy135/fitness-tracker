@@ -155,6 +155,9 @@ export function NavigationBar() {
         </div>
       </nav>
 
+      {/* Spacer for the fixed top navigation */}
+      <div className="h-12 md:h-14" aria-hidden="true" />
+
       {/* Mobile Bottom Navigation - Fixed */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
         <div className="px-2 py-2">
