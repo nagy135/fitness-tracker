@@ -8,7 +8,7 @@ const mockRecords: WorkoutRecord[] = [
     createdAt: '2024-01-01T10:00:00Z',
     updatedAt: '2024-01-01T10:00:00Z',
     exerciseId: 1,
-    exercise: { id: 1, name: 'Bench Press', createdAt: '', updatedAt: '' },
+    exercise: { id: 1, name: 'Bench Press', totalWeightMultiplier: 1, createdAt: '', updatedAt: '' },
     userId: 1,
     sets: [
       { id: 1, reps: 10, weight: 100, recordId: 1, createdAt: '', updatedAt: '' },
@@ -20,7 +20,7 @@ const mockRecords: WorkoutRecord[] = [
     createdAt: '2024-01-05T10:00:00Z',
     updatedAt: '2024-01-05T10:00:00Z',
     exerciseId: 1,
-    exercise: { id: 1, name: 'Bench Press', createdAt: '', updatedAt: '' },
+    exercise: { id: 1, name: 'Bench Press', totalWeightMultiplier: 1, createdAt: '', updatedAt: '' },
     userId: 1,
     sets: [
       { id: 3, reps: 12, weight: 110, recordId: 2, createdAt: '', updatedAt: '' },
@@ -32,7 +32,7 @@ const mockRecords: WorkoutRecord[] = [
     createdAt: '2024-01-02T10:00:00Z',
     updatedAt: '2024-01-02T10:00:00Z',
     exerciseId: 2,
-    exercise: { id: 2, name: 'Squat', createdAt: '', updatedAt: '' },
+    exercise: { id: 2, name: 'Squat', totalWeightMultiplier: 1, createdAt: '', updatedAt: '' },
     userId: 1,
     sets: [
       { id: 5, reps: 15, weight: 150, recordId: 3, createdAt: '', updatedAt: '' },
@@ -57,4 +57,4 @@ function testProcessRecordsForStatistics() {
 }
 
 // Export for potential future use
-export { testProcessRecordsForStatistics }; 
+export { testProcessRecordsForStatistics };
